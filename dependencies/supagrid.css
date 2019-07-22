@@ -1,0 +1,66 @@
+
+.x-supagrid {
+  max-width: 98%;
+  max-height: 98%;
+  overflow-x: scroll;
+  display: block;
+}
+
+.x-supagrid .container {
+  display: table;
+}
+
+.x-supagrid .body {
+  direction: rtl;
+  overflow-y: scroll;
+  max-height: 98%;
+  display: block;
+}
+
+.x-supagrid .head {
+  padding-left: 15px;
+  display:block;
+}
+
+.x-supagrid .body table {
+  direction: ltr;
+}
+
+.x-supagrid tr.focus td, .x-supagrid tr.focus td input {
+  background-color: #eee;
+}
+
+.x-supagrid th input {
+  display: block;
+  width: 170px;
+}
+
+.x-supagrid .head th {
+  text-align:left;
+  border-bottom: 1px #666 solid;
+  margin:0;
+  padding: 3px;
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  box-sizing: border-box;
+}
+
+.x-supagrid td {
+  margin: 0;
+  padding: 0;
+  border: none;
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+}
+
+.x-supagrid .body input {
+  text-align:left;
+  padding: 8px;
+  width: 164px;
+  box-sizing: padding-box;
+  border: none;
+  border-bottom: 1px #ccc solid;
+}
+

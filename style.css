@@ -1,0 +1,87 @@
+#map {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+
+/* TABLE */
+
+.leaflet-table-container {
+  max-width: calc(100vw - 28px); /* margin + padding */
+}
+
+
+/* ATTRIBUTION CONTROL */
+
+.leaflet-control-attribution * {
+  vertical-align: middle;
+}
+
+.leaflet-control-attribution:hover :not(.attribution-icon),
+.leaflet-control-attribution .attribution-icon {
+  display: inline-block;
+}
+
+.leaflet-control-attribution :not(.attribution-icon),
+.leaflet-control-attribution:hover .attribution-icon {
+  display: none;
+}
+
+.attribution-icon {
+  cursor: pointer;
+  font-size: 2em;
+  margin: 0 4px;
+}
+
+
+/* LEGEND */
+
+.legend.leaflet-control {
+  min-width: 24px;
+  padding: 5px 10px;
+
+  background-color: #fff;
+  background-clip: padding-box;
+
+  border: 2px solid rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+
+.legend.leaflet-control:hover .legend-description  {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.legend-row {
+  margin-bottom: 5px;
+}
+
+.legend-row:last-child {
+  margin: 0;
+}
+
+.legend-colour {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.legend-description {
+  display: none;
+  margin-left: 5px;
+}
+
+.legend-colour {
+  width: 2em;
+  height: 2em;
+}
+
+
+/* MAGNIFIYING GLASS  CONTROL */
+
+.leaflet-control-magnifying-glass {
+  background-image: url(media/cropped-eox_eye-32x32.png);
+  background-size: 20px;
+}
