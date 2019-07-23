@@ -80,6 +80,8 @@ const CONFIDENCE_THRESHOLD = 95
 * EOX Terrain Light or Sentinel-2 Cloudless 2018 basemaps
 * Minimap providing an overview area using OpenStreetMap data
 
+ℹ️ For performance reasons agricultural parcels and physical blocks are only visible from zoom level 14 or higher (~ >1:20,000).
+
 
 ## Contributing
 
