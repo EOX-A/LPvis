@@ -3,7 +3,7 @@
 
 Use LPvis to visualize the results of crop type classifications in comparison to IACS/CAP (Common Agricultural Policy) declarations. Simple traffic light symbology shows computed conformity and tooltips and a data table let you dig deeper into the data.
 
->//TODO: DEMO 
+>//TODO: DEMO
 
 ![LPvis 🕺 Screenshot](media/Screenshot_LPvis_🕺.png)
 
@@ -85,7 +85,10 @@ const CONFIDENCE_THRESHOLD = 95
 
 We are interested in your contributions. For questions, feedback and feature proposals open an issue. For minor bug fixes you can create a PR right away.
 
-## Dependencies
+
+## Links and References
+
+### Dependencies
 - [Leaflet.js](https://leafletjs.com/) / [License information](https://github.com/Leaflet/Leaflet/blob/master/LICENSE)
 - [Leaflet.VectorGrid](https://github.com/Leaflet/Leaflet.VectorGrid) / [License information](https://github.com/Leaflet/Leaflet.VectorGrid#legalese)
 - [Leaflet table](https://github.com/diogok/leaflet.table) / MIT License
@@ -93,6 +96,19 @@ We are interested in your contributions. For questions, feedback and feature pro
 - [Leaflet Magnifying Glass](https://github.com/bbecquet/Leaflet.MagnifyingGlass) / MIT License
 - [Leaflet.Control.Custom](https://github.com/yigityuce/Leaflet.Control.Custom) / MIT License
 - [Leaflet.MiniMap](https://github.com/Norkart/Leaflet-MiniMap) / BSD 2-Clause "Simplified" License
+
+### Data
+- [INSPIRE Geoportal (European Commission)](https://inspire-geoportal.ec.europa.eu/)
+- [INVEKOS Schläge Österreich (Statistik Austria)](https://www.data.gv.at/katalog/dataset/e21a731f-9e08-4dd3-b9e5-cd460438a5d9)
+- [INVEKOS Referenzen Österreich (Statistik Austria)](https://www.data.gv.at/katalog/dataset/b9cab416-896b-408a-8665-9f4ac30f79db)
+- [Nuts2json (Eurostat)](https://github.com/eurostat/Nuts2json)
+
+### Background
+- [2019 JRC workshop on checks and management of agricultural land in IACS](https://ec.europa.eu/jrc/en/event/workshop/iacs-workshop-2019), especially the ["SEN4CAP output for monitoring" presentation](https://ec.europa.eu/jrc/sites/jrcsh/files/14-sen4cap.pdf) by Benjamin Koetz (ESA) and Pierre Defourny (BE)
+
+
+## Acknowledgements
+We want to thank CAP Paying Agency Agrarmarkt Austria, represented by Bernhard Eder and Angela Trischak, for providing user requirements and practical insights into Austrian parcel data used in the demo example.
 
 ## Licensing
 
