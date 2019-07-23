@@ -3,7 +3,7 @@
 
 Use LPvis to visualize the results of crop type classifications in comparison to IACS/CAP (Common Agricultural Policy) declarations. Simple traffic light symbology shows computed conformity and tooltips and a data table let you dig deeper into the data.
 
->//TODO: DEMO
+## [Demo (using randomly generated classification results)](http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/)
 
 ![LPvis 🕺 Screenshot](media/Screenshot_LPvis_🕺.png)
 
