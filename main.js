@@ -348,9 +348,13 @@ function trafficLightStyle (properties, is_highlighted) {
     color: 'green',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style),
   }
-  else return {
+  else if (properties.match === 'False') return {
     fillColor: 'red',
     color: 'red',
+    ...(is_highlighted ? parcel_style_highlighted : parcel_style)
+  } else return {
+    fillColor: 'grey',
+    color: 'grey',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
   }
 }
@@ -512,8 +516,10 @@ agricultural_parcels.on('mouseover', e => {
   agricultural_parcels.setTooltipContent(
     `ID: ${attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER]}<br>
     Declaration: ${attributes['CT']}<br>
-    Conform: ${attributes.match === 'True' ? 'yes' : 'no'}<br>
-    Confidence level: ${attributes.accuracy}%`,
+    Conform: ${attributes.match === 'True' ? 'yes'
+             : attributes.match === 'False' ? 'no'
+             : 'not classified'}<br>
+    Confidence level: ${attributes.accuracy}${attributes.accuracy ? '%' : ''}`,
     { sticky:true })
 })
 
