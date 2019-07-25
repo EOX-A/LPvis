@@ -26,9 +26,9 @@ Visualize land parcels together with classification results
 
 /****** PARAMETERS ******/
 
-const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:8080/data/agricultural_parcels/{z}/{x}/{y}.pbf' //'http://localhost:9000/{z}/{x}/{y}.pbf'
-const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:8080/data/referenz/{z}/{x}/{y}.pbf'
-const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:8080/data/gem_at/{z}/{x}/{y}.pbf'
+const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
+const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
+const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
 
 // NUTS_LEVEL and NUTS_CODE_STARTS_WITH only apply to GeoJSONs from Eurostat's Nuts2json
 // https://github.com/eurostat/Nuts2json
@@ -352,7 +352,8 @@ function trafficLightStyle (properties, is_highlighted) {
     fillColor: 'red',
     color: 'red',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
-  } else return {
+  }
+  else return {
     fillColor: 'grey',
     color: 'grey',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
@@ -493,7 +494,7 @@ const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMP
   // minZoom must not be <= minNativeZoom otherwise library requests millions of tiles
   // Leaflet bug: https://github.com/Leaflet/Leaflet/issues/6504
   // minNativeZoom: 14,
-  // maxNativeZoom: 18,
+  maxNativeZoom: 16,
   minZoom: 14,
   vectorTileLayerStyles: {
     agricultural_parcels: properties => {

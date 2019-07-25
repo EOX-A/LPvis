@@ -19,9 +19,9 @@ LPvis expects LPIS (Land-Parcel Identification System) data and administrative b
 - Export as `gpkg`.
 - Pipe `gpkg` with `fiona` to [`tippecanoe`](https://github.com/mapbox/tippecanoe). E.g.:
 ```shell
-fio cat agricultural_parcels.gpkg | tippecanoe --drop-densest-as-needed --read-parallel --minimum-zoom=14 --maximum-zoom=18 --output=agricultural_parcels.mbtiles -f
+fio cat agricultural_parcels.gpkg | tippecanoe --drop-densest-as-needed --read-parallel --minimum-zoom=14 --maximum-zoom=16 --output-to-directory=agricultural_parcels -l agricultural_parcels -f
 ```
-6. Serve `mbtiles` with [`tileserver-gl-light`](https://github.com/klokantech/tileserver-gl).
+6. Serve tile directory with `<directory to LPvis>/util/serve_with_headers.py <port>` to add the necessary headers.
 
 ## Installation / Getting started
 
@@ -36,9 +36,9 @@ The above steps will let you view LPvis in your browser. Most probably you will 
 Replace the URLs in `main.js` with the ones pointing to your hosted tile directories. You should also adapt the respective `attribution` options further down in the code.
 
 ```javascript
-const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:8080/data/agricultural_parcels/{z}/{x}/{y}.pbf'
-const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:8080/data/physical_blocks/{z}/{x}/{y}.pbf'
-const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:8080/data/municipalities/{z}/{x}/{y}.pbf'
+const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
+const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
+const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
 ```
 
 NUTS administrative boundaries are used to automatically center LPvis on the area of interest. A good source is [Eurostat's Nuts2json](https://github.com/eurostat/Nuts2json), but you can also replace the URL with the path to a local GeoJSON. `NUTS_LEVEL` and `NUTS_CODE_STARTS_WITH` are used to specify the administrative level and filter by NUTS code, respectively. They only apply to GeoJSONs from Nuts2json.
