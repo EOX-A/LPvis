@@ -258,7 +258,7 @@ function fetchJSON(url) {
 }
 
 function clearClickedFeatures() {
-  for(let id of clicked_features) agricultural_parcels.resetFeatureStyle(id)
+  for(let f of clicked_features) agricultural_parcels.resetFeatureStyle(f[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER])
   clicked_features = []
 }
 
@@ -529,10 +529,10 @@ agricultural_parcels.on('click', e => {
   const attributes = e.propagatedFrom.properties
   console.log(attributes)
 
-  if(!clicked_features.includes(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER])) {
+  if(!clicked_features.includes(attributes)) {
     if (L.Browser.mobile) clearClickedFeatures() // so that only one parcel is highlighted at a time
     if (table) table.addLine(attributes)
-    clicked_features.push(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER])
+    clicked_features.push(attributes)
 
     agricultural_parcels.setFeatureStyle(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER], trafficLightStyle(attributes,true))
   }
