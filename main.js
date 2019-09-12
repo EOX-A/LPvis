@@ -28,6 +28,8 @@ Visualize land parcels together with classification results
 
 const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
 const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
+const SMALL_PARCELS_URL_TEMPLATE = 'http://localhost:9003/{z}/{x}/{y}.pbf'
+const SMALL_PARCELS_POINTS_URL_TEMPLATE = 'http://localhost:9004/{z}/{x}/{y}.pbf'
 const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
 
 // NUTS_LEVEL and NUTS_CODE_STARTS_WITH only apply to GeoJSONs from Eurostat's Nuts2json
@@ -38,6 +40,8 @@ const NUTS2_GEOJSON_URL = 'geodata/bounding_box_classification_20190723.geojson'
 
 const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'Ori_id'
 const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = 'RFL_ID'
+const SMALL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
+const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
 
 const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
 
@@ -488,6 +492,53 @@ const physical_blocks = L.vectorGrid.protobuf(PHYSICAL_BLOCKS_URL_TEMPLATE, {
   attribution: 'INVEKOS Referenzflächen Österreich { CC-BY-3.0-AT Agrarmarkt Austria }'
 }).bindTooltip('', { sticky: true }).addTo(map)
 
+const small_parcels = L.vectorGrid.protobuf(SMALL_PARCELS_URL_TEMPLATE, {
+  rendererFactory: L.svg.tile,
+  pane: 'swipePane',
+  interactive: true,
+  maxNativeZoom: 16,
+  minZoom: 14,
+  vectorTileLayerStyles: {
+    small_parcels: properties => {
+      return {
+        fill: true,
+        fillColor: 'orange',
+        fillOpacity: 1,
+        color: '#000000',
+        weight: 0.2
+      }
+    }
+  },
+  getFeatureId: feature => feature.properties[SMALL_PARCELS_UNIQUE_IDENTIFIER],
+  attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
+}).bindTooltip('', { sticky: true }).addTo(map)
+
+const small_parcels_points = L.vectorGrid.protobuf(SMALL_PARCELS_POINTS_URL_TEMPLATE, {
+  rendererFactory: L.svg.tile,
+  pane: 'swipePane',
+  interactive: true,
+  maxNativeZoom: 18,
+  minZoom: 18,
+  vectorTileLayerStyles: {
+    small_parcels_points:
+    properties => {
+      return {
+        fill: true,
+        fillColor: 'black',
+        fillOpacity: 1,
+        stroke: true,
+        weight: 0.8,
+        color: 'white',
+        radius: 4,
+        className: 'points'
+      }
+    }
+  },
+  getFeatureId: feature => feature.properties[SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER],
+  attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
+}).bindTooltip('', { sticky: true }).addTo(map)
+
+
 const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMPLATE, {
   rendererFactory: L.svg.tile,
   interactive: true,
@@ -543,6 +594,21 @@ physical_blocks.on('mouseover', e => {
   physical_blocks.setTooltipContent(
     `ID: ${attributes[PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER]}<br>
     Type: ${attributes['REF_ART']}`
+  )
+})
+
+small_parcels.on('mouseover', e => {
+  const attributes = e.propagatedFrom.properties
+  small_parcels.setTooltipContent(
+    `ID: ${attributes[SMALL_PARCELS_UNIQUE_IDENTIFIER]}<br>
+    Type: ${attributes['SNAR_BEZEI']}`
+  )
+})
+
+small_parcels_points.on('mouseover', e => {
+  const attributes = e.propagatedFrom.properties
+  small_parcels_points.setTooltipContent(
+    `P${attributes['pointnr']}`
   )
 })
 
@@ -635,6 +701,8 @@ var baselayers = {
 
 var overlays = {
   "Physical blocks": physical_blocks,
+  "Small parcels": small_parcels,
+  "Small parcels points": small_parcels_points,
   "Agricultural parcels": agricultural_parcels,
   "Overlay": overlay
 }
