@@ -1,9 +1,48 @@
-#map {
-  position: absolute;
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+
+body {
+  margin: 0;
+}
+
+#wrapper {
+  display: flex;
+  flex-flow: row wrap;
+
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+#wrapper > * {
+  flex: 1 100%;
+}
+
+#map {
+  height: 100vh;
+}
+
+#sidebar {
+  padding: 5px;
+}
+
+@media all and (min-width: 1000px) {
+  #sidebar {
+    flex: 0 0 400px;
+  }
+
+  #map {
+    flex: auto;
+  }
 }
 
 
@@ -84,4 +123,34 @@
 .leaflet-control-magnifying-glass {
   background-image: url(media/cropped-eox_eye-32x32.png);
   background-size: 20px;
+}
+
+
+/* CHART CIRCLES */
+circle {
+	fill: #ffe4b3;
+
+}
+.circles-cloudfree {
+	stroke: #ffa500;
+	stroke-width: 1.25;
+}
+
+
+/* TIMESERIES TABLE */
+#points-table {
+    border-collapse: collapse;
+}
+
+#points-table td, #points-table th {
+  border: black solid 1px;
+  padding: 4px;
+}
+
+#points-table th {
+  background-color: DodgerBlue;
+}
+
+#points-table tr:nth-child(even) {
+  background-color: lightblue;
 }

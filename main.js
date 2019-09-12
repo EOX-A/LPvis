@@ -587,6 +587,8 @@ agricultural_parcels.on('click', e => {
 
     agricultural_parcels.setFeatureStyle(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER], trafficLightStyle(attributes,true))
   }
+
+  updateSidebar(`${attributes['Ori_hold']}_${attributes['FSNR']}_${attributes['SLNR']}`)
 })
 
 physical_blocks.on('mouseover', e => {
@@ -622,6 +624,8 @@ map.on('click', e => {
     }
 
   }
+
+  updateTimeseriesGraph(clicked_features)
 })
 
 map.on('zoomend', e => {
