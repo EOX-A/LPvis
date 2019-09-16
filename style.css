@@ -48,10 +48,16 @@ body {
 }
 
 
+/* LEAFLET */
+
+div.leaflet-bottom.leaflet-left {
+	width: 100%
+}
+
 /* TABLE */
 
 .leaflet-table-container {
-  max-width: calc(100vw - 28px); /* margin + padding */
+  max-width: calc(100% - 20px); /* margin + padding */
 }
 
 
