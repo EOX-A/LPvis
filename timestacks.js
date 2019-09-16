@@ -22,11 +22,12 @@ const t = d3.transition()
   .duration(1250)
   .ease(d3.easeCubicOut);
 
+
 window.addEventListener('DOMContentLoaded', e => {
-  sidebar = document.querySelector('#sidebar')
+    sidebar = document.querySelector('#sidebar')
+});
 
-  /********* SET UP SIDEBAR **********/
-
+function setUpSidebar() {
   // SVG CHART
   let margin = {top: 20, right: 20, bottom: 20, left: 40},
       width  = sidebar.offsetWidth - margin.left - margin.right,
@@ -88,7 +89,18 @@ window.addEventListener('DOMContentLoaded', e => {
   d3.select('#sidebar').append('button')
     .on('click', e => location.href = csvurl)
     .text('Download Timestack (CSV)')
-});
+}
+
+function showSidebar() {
+  sidebar.style.display = 'block'
+  map.invalidateSize()
+  if(!sidebar.hasChildNodes()) setUpSidebar()
+}
+
+function hideSidebar() {
+  sidebar.style.display = 'none'
+  map.invalidateSize()
+}
 
 
 

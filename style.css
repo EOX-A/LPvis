@@ -33,6 +33,8 @@ body {
 
 #sidebar {
   padding: 5px;
+	display: none;
+	position: relative;
 }
 
 @media all and (min-width: 1000px) {
@@ -75,10 +77,9 @@ body {
   margin: 0 4px;
 }
 
+/* CUSTOM CONTROLS */
 
-/* LEGEND */
-
-.legend.leaflet-control {
+.custom-control.leaflet-control {
   min-width: 24px;
   padding: 5px 10px;
 
@@ -88,6 +89,28 @@ body {
   border: 2px solid rgba(0,0,0,0.2);
   border-radius: 5px;
 }
+
+
+/* TIMESTACK CONTROL */
+
+.leaflet-control-timestack {
+	width: 30px;
+	height: 30px;
+	background-image: url(media/analysis.svg);
+	background-size: 25px;
+	cursor: pointer;
+}
+
+.leaflet-control-timestack.active {
+	background-color: #ffe4b3;
+}
+
+.leaflet-control-timestack.active:hover {
+	background-color: orange;
+}
+
+
+/* LEGEND */
 
 .legend.leaflet-control:hover .legend-description  {
   display: inline-block;

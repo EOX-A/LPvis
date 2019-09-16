@@ -48,8 +48,13 @@ const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofot
 const CONFIDENCE_THRESHOLD = 95
 const INITIAL_SWIPE_DISTANCE = 0
 
-let legend_control, nuts2, swipe_control, table
+const timestack_icon_attribution = '<div>Icons made by ' +
+                                      '<a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from ' +
+                                      '<a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>'
+
+let legend_control, nuts2, swipe_control, timestack_control, table
 let clicked_features = []
+let timestack_mode = false
 
 const parcel_style = {
   weight: 0.3,
@@ -250,6 +255,44 @@ L.MagnifyingGlass.include({
     }
   },
 })
+
+L.Control.Timestack = L.Control.extend({
+  options: {
+    position: 'topleft'
+  },
+
+  onAdd: function (map) {
+    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
+    const link = L.DomUtil.create('a', 'custom-control leaflet-control-timestack', container)
+
+    L.DomEvent
+    .addListener(link, 'click', L.DomEvent.stopPropagation)
+    .addListener(link, 'click', L.DomEvent.preventDefault)
+    .addListener(link, 'click', this._clicked);
+
+    map.timestack_control = this
+    return container
+  },
+
+  onRemove: function (map) {
+    delete map.timestack_control
+  },
+
+  _clicked: function () {
+    if(timestack_mode) {
+      timestack_mode = false
+      this.classList.remove('active')
+      hideSidebar()
+    } else {
+      timestack_mode = true
+      this.classList.add('active')
+    }
+  }
+})
+
+L.control.timestack = function () {
+  return new L.Control.Timestack();
+};
 
 
 /****** FUNCTIONS ******/
@@ -577,18 +620,22 @@ agricultural_parcels.on('mouseover', e => {
 
 agricultural_parcels.on('click', e => {
   L.DomEvent.stopPropagation(e)
+  if (timestack_mode || L.Browser.mobile) clearClickedFeatures() // so that only one parcel is highlighted at a time
+
   const attributes = e.propagatedFrom.properties
   console.log(attributes)
 
   if(!clicked_features.includes(attributes)) {
-    if (L.Browser.mobile) clearClickedFeatures() // so that only one parcel is highlighted at a time
     if (table) table.addLine(attributes)
     clicked_features.push(attributes)
 
     agricultural_parcels.setFeatureStyle(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER], trafficLightStyle(attributes,true))
   }
 
-  updateSidebar(`${attributes['Ori_hold']}_${attributes['FSNR']}_${attributes['SLNR']}`)
+  if(timestack_mode) {
+    showSidebar()
+    updateSidebar(`${attributes['Ori_hold']}_${attributes['FSNR']}_${attributes['SLNR']}`)
+  }
 })
 
 physical_blocks.on('mouseover', e => {
@@ -615,7 +662,7 @@ small_parcels_points.on('mouseover', e => {
 })
 
 map.on('click', e => {
-  if(clicked_features.length > 0) {
+  if(clicked_features.length > 0 && !timestack_mode) {
     clearClickedFeatures()
 
     const tbody = document.querySelector('div.body > table > tbody')
@@ -665,10 +712,17 @@ map.on('zoomend', e => {
 
   if (map.getZoom() >= 14 && map.hasLayer(agricultural_parcels)) {
     map.addControl(legend_control)
+    if(!map.timestack_control) map.addControl(timestack_control)
+    map.attributionControl.addAttribution(timestack_icon_attribution)
   }
 
   if (map.getZoom() < 14) {
     map.removeControl(legend_control)
+    map.removeControl(timestack_control)
+    map.attributionControl.removeAttribution(timestack_icon_attribution)
+    timestack_mode = false
+    hideSidebar()
+
     removeTooltipsFromMap()
   }
 })
@@ -713,10 +767,9 @@ var overlays = {
 
 L.control.layers(baselayers, overlays).addTo(map)
 
-
 legend_control = L.control.custom({
   position: 'topright',
-  classes: 'legend',
+  classes: 'legend custom-control',
   content: (function() {
     let legend_content = ''
     const high_confidence_string = `High Confidence (≥${CONFIDENCE_THRESHOLD}%)`
@@ -737,6 +790,7 @@ legend_control = L.control.custom({
   })()
 })
 
+timestack_control = L.control.timestack()
 
 const minimap = L.control.minimap(osm, { //layer must be one that is not present on map yet
   toggleDisplay: true,
