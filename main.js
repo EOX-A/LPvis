@@ -411,6 +411,7 @@ function trafficLightStyle (properties, is_highlighted) {
 /****** INIT MAP ******/
 
 const map = L.map('map').setView([50.102223, 9.254419], 4)
+map.attributionControl.setPrefix('<a href="https://github.com/EOX-A/LPvis" target="_blank">LPvis 🕺</a> | <a href="https://leafletjs.com/" target="_blank">Leaflet</a>')
 map.createPane('administrative').style.zIndex = 250
 map.createPane('labels').style.zIndex = 450
 
