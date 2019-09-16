@@ -48,13 +48,10 @@ const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofot
 const CONFIDENCE_THRESHOLD = 95
 const INITIAL_SWIPE_DISTANCE = 0.1
 
-const timestack_icon_attribution = '<div>Icons made by ' +
-                                      '<a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from ' +
-                                      '<a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>'
 
-let legend_control, nuts2, swipe_control, timestack_control, table
-let clicked_features = []
-let timestack_mode = false
+const timestack_icon_attribution = '<div>Icons made by ' +
+'<a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from ' +
+'<a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>'
 
 const parcel_style = {
   weight: 0.3,
@@ -69,6 +66,9 @@ const parcel_style_highlighted = {
   fillOpacity: 1,
 }
 
+let clicked_features = []
+let timestack_mode = false
+let legend_control, nuts2, swipe_control, timestack_control, table
 
 /****** CLASS MODIFICATIONS ******/
 
@@ -238,24 +238,7 @@ L.control.Table.include({
   }
 })
 
-
-L.MagnifyingGlass.include({
-  setFixedZoom: function(fixedZoom) {
-    this._fixedZoom = (fixedZoom != -1);
-    this.options.fixedZoom = fixedZoom;
-    this._updateZoom()
-  },
-
-  setRadius: function(radius) {
-    this.options.radius = radius;
-    if(this._wrapperElt) {
-      this._wrapperElt.style.width = this.options.radius * 2 + 'px';
-      this._wrapperElt.style.height = this.options.radius * 2 + 'px';
-      this._glassMap.invalidateSize()
-    }
-  },
-})
-
+/* New button to toggle timestack mode / sidebar */
 L.Control.Timestack = L.Control.extend({
   options: {
     position: 'topleft'
@@ -266,9 +249,9 @@ L.Control.Timestack = L.Control.extend({
     const link = L.DomUtil.create('a', 'custom-control leaflet-control-timestack', container)
 
     L.DomEvent
-    .addListener(link, 'click', L.DomEvent.stopPropagation)
-    .addListener(link, 'click', L.DomEvent.preventDefault)
-    .addListener(link, 'click', this._clicked);
+      .addListener(link, 'click', L.DomEvent.stopPropagation)
+      .addListener(link, 'click', L.DomEvent.preventDefault)
+      .addListener(link, 'click', this._clicked);
 
     map.timestack_control = this
     return container
@@ -293,6 +276,25 @@ L.Control.Timestack = L.Control.extend({
 L.control.timestack = function () {
   return new L.Control.Timestack();
 };
+
+/* Two new functions for L.MagnifyingGlass to aid interaction with additional
+zoom level (zoom in orthophoto beyond level 19)*/
+L.MagnifyingGlass.include({
+  setFixedZoom: function(fixedZoom) {
+    this._fixedZoom = (fixedZoom != -1);
+    this.options.fixedZoom = fixedZoom;
+    this._updateZoom()
+  },
+
+  setRadius: function(radius) {
+    this.options.radius = radius;
+    if(this._wrapperElt) {
+      this._wrapperElt.style.width = this.options.radius * 2 + 'px';
+      this._wrapperElt.style.height = this.options.radius * 2 + 'px';
+      this._glassMap.invalidateSize()
+    }
+  },
+})
 
 
 /****** FUNCTIONS ******/
@@ -582,7 +584,6 @@ const small_parcels_points = L.vectorGrid.protobuf(SMALL_PARCELS_POINTS_URL_TEMP
   attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
 }).bindTooltip('', { sticky: true }).addTo(map)
 
-
 const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMPLATE, {
   rendererFactory: L.svg.tile,
   interactive: true,
@@ -670,10 +671,7 @@ map.on('click', e => {
     while(tbody && tbody.lastChild) {
       tbody.removeChild(tbody.lastChild)
     }
-
   }
-
-  updateTimeseriesGraph(clicked_features)
 })
 
 map.on('zoomend', e => {
@@ -719,6 +717,7 @@ map.on('zoomend', e => {
 
   if (map.getZoom() < 14) {
     map.removeControl(legend_control)
+
     map.removeControl(timestack_control)
     map.attributionControl.removeAttribution(timestack_icon_attribution)
     timestack_mode = false
@@ -791,15 +790,6 @@ legend_control = L.control.custom({
   })()
 })
 
-timestack_control = L.control.timestack()
-
-const minimap = L.control.minimap(osm, { //layer must be one that is not present on map yet
-  toggleDisplay: true,
-  minimized: L.Browser.mobile // true if mobile browser
-}).addTo(map)
-minimap._miniMap.invalidateSize() // otherwise minimap is going crazy
-map.attributionControl.addAttribution(osm.getAttribution())
-
 const magnifying_glass = L.magnifyingGlass({
     layers: [orthophoto],
     radius: 140,
@@ -825,7 +815,16 @@ L.control.magnifyingglass(magnifying_glass, {
     forceSeparateButton: true
 }).addTo(map)
 
+const minimap = L.control.minimap(osm, { //layer must be one that is not present on map yet
+  toggleDisplay: true,
+  minimized: L.Browser.mobile // true if mobile browser
+}).addTo(map)
+minimap._miniMap.invalidateSize() // otherwise minimap is going crazy
+map.attributionControl.addAttribution(osm.getAttribution())
+
 L.control.scale( {
   imperial: false,
   maxWidth: 200
 } ).addTo(map)
+
+timestack_control = L.control.timestack()
