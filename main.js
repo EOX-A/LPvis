@@ -46,7 +46,7 @@ const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
 const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
 
 const CONFIDENCE_THRESHOLD = 95
-const INITIAL_SWIPE_DISTANCE = 0
+const INITIAL_SWIPE_DISTANCE = 0.1
 
 const timestack_icon_attribution = '<div>Icons made by ' +
                                       '<a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from ' +
@@ -495,7 +495,7 @@ const municipalities = L.vectorGrid.protobuf(MUNICIPALITIES_URL_TEMPLATE, {
   minZoom: 11,
   pane: 'administrative',
   vectorTileLayerStyles: {
-    gem_at: {
+    municipalities: {
       stroke: true,
       color: '#cc6633',
       weight: 1
