@@ -111,8 +111,16 @@ function updateSidebar(id) {
 
   csvurl = `geodata/timestacks/${id}.csv`
   fetch(csvurl)
-  .then(response => response.ok ? response.text() : '')
+  .then(response => { if (response.ok) { return response.text() } else { throw new Error('No timestack found') } })
   .then(csv => {
+    const children = d3.selectAll('#sidebar > :not(#sidebar-overlay)')
+    for(let n of children.nodes()) {
+      n.style.filter = ''
+    }
+    if(document.querySelector('#sidebar').contains(document.querySelector('#sidebar-overlay'))) {
+      document.querySelector('#sidebar-overlay').remove()
+    }
+
     const ts = d3.csvParse(csv, d => {
       const point_keys = Object.keys(d).filter(k => k.startsWith('P'))
       for(let pk of point_keys) {
@@ -303,5 +311,27 @@ function updateSidebar(id) {
 
 
     console.log(datemap_cols)
+  })
+  .catch(e => {
+    console.error(e)
+    const children = d3.selectAll('#sidebar > :not(#sidebar-overlay)')
+    for(let n of children.nodes()) {
+      n.style.filter = 'blur(4px)'
+    }
+    if(!document.querySelector('#sidebar').contains(document.querySelector('#sidebar-overlay'))) {
+      d3.select('#sidebar').append('div')
+        .attr('id', 'sidebar-overlay')
+        .style('position', 'absolute')
+        .style('width', '100%')
+        .style('height', '100%')
+        .style('top', 0)
+        .style('left', 0)
+        .style('display', 'table')
+        .append('div')
+          .style('display', 'table-cell')
+          .style('vertical-align', 'middle')
+          .style('text-align', 'center')
+          .text('No timestack available for this parcel')
+    }
   })
 }
