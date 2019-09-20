@@ -307,7 +307,7 @@ function updateSidebar(id) {
       chart.select('#tooltip-line')
         .attr('x1', x(o.date))
         .attr('x2', x(o.date))
-        .attr('y1', y(o.max))
+        .attr('y1', y(o.median))
 
       // Source: https://www.d3-graph-gallery.com/graph/interactivity_tooltip.html
       tooltip
