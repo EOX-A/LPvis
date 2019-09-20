@@ -1,5 +1,13 @@
+@font-face {
+  font-family: Roboto;
+  src: url("media/Roboto-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 html {
 	box-sizing: border-box;
+	font-family: 'Roboto', sans-serif;
 }
 
 *,
