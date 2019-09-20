@@ -39,10 +39,26 @@ body {
   height: 100vh;
 }
 
+/* SIDEBAR */
+
 #sidebar {
   padding: 5px;
 	display: none;
 	position: relative;
+}
+
+#sidebar summary {
+	text-align: center;
+}
+
+#sidebar table {
+	margin: 0 auto;
+	text-align: center;
+}
+
+#sidebar > button {
+	display: block;
+	margin: 10px auto;
 }
 
 @media all and (min-width: 1000px) {
