@@ -44,7 +44,7 @@ window.addEventListener('DOMContentLoaded', e => {
 /****** FUNCTIONS ******/
 
 function showSidebar() {
-  sidebar.style.display = 'block'
+  sidebar.style.display = 'flex'
   map.invalidateSize()
   if(!sidebar.hasChildNodes()) setUpSidebar()
 }
@@ -56,9 +56,11 @@ function hideSidebar() {
 
 function setUpSidebar() {
   // SVG CHART
+  console.log(sidebar.offsetWidth, sidebar.clientWidth)
   let margin = {top: 20, right: 20, bottom: 20, left: 40},
       width  = sidebar.offsetWidth - margin.left - margin.right,
       height = 300 - margin.top - margin.bottom
+      // scrollbar_offset = 20
 
   x = d3.scaleTime()
         .range([0, width]),
@@ -78,29 +80,22 @@ function setUpSidebar() {
     .attr('transform', `translate(${margin.left},${margin.top})`)
 
   xAxis = chart.append('g')
-    .attr('stroke','#000000')
+    .attr('stroke','#ffffff')
     .attr('transform', `translate(0,${height})`)
     .call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)))
 
   yAxis = chart.append('g')
-    .attr('stroke','#000000')
+    .attr('stroke','#ffffff')
     .call(d3.axisLeft(y))
 
   graphic = chart.append('g')
 
-  chart.append('line')
+  chart.append('line').classed('tooltip-line', true)
     .attr('id', 'tooltip-line')
-    .style('visibility', 'hidden')
     .attr('y2', y(0))
-    .attr('stroke', '#000000')
 
   tooltip = d3.select("#sidebar").append('div')
-    .attr('id', 'tooltip')
-    .style('display', 'none')
-    .style('position', 'absolute')
-    .style('border', 'black solid 1px')
-    .style('padding', '6px')
-    .style('background-color', 'white')
+    .classed('tooltip', true)
 
 
   // METADATA AND DATA TABLE
@@ -114,9 +109,10 @@ function setUpSidebar() {
   tbody = table.append('tbody')
 
   // DOWNLOAD BUTTON
-  d3.select('#sidebar').append('button')
-    .on('click', e => location.href = csvurl)
-    .text('Download Timestack (CSV)')
+  d3.select('#sidebar').append('a')
+    .classed('btn download-btn', true)
+    .attr('id', 'download-button')
+    .html('<i class="fas fa-download"></i> Download Timestack (CSV)')
 }
 
 function updateSidebar(id) {
@@ -126,6 +122,9 @@ function updateSidebar(id) {
   d3.select('#tooltip-line').style('visibility', 'hidden')
 
   csvurl = `geodata/timestacks/${id}.csv`
+  d3.select('#download-button')
+    .attr('href', csvurl)
+
   fetch(csvurl)
   .then(response => {
     if (response.ok) {
@@ -223,37 +222,25 @@ function updateSidebar(id) {
     console.log(datemap)
 
     // Set up D3 visalisation
-    graphic.selectAll('.areas')
+    graphic.selectAll('.area')
       .data([ndvits])
       .join('path')
         .transition(t)
-        .attr('class', 'areas')
-        .attr('fill','#ffe4b3')
-        .attr('stroke', '#ffe4b3')
-        .attr('stroke-width', 2)
-        .attr('stroke-linecap', 'square')
+        .attr('class', 'area')
         .attr('d', area)
 
     graphic.selectAll('.line-gaps')
       .data([ndvits.filter(line.defined())])
       .join('path')
+        .classed('line-gaps', true)
         .transition(t)
-        .attr('class', 'line-gaps')
-        .attr('fill', 'none')
-        .attr('stroke', '#ffe4b3')
-        .attr('stroke-width', '2px')
-        .attr('stroke-linecap', 'butt')
         .attr('d', line)
 
     graphic.selectAll('.line-segments')
       .data([ndvits])
       .join('path')
+        .classed('line-segments', true)
         .transition(t)
-        .attr('class', 'line-segments')
-        .attr('fill', 'none')
-        .attr('stroke', '#ffa500')
-        .attr('stroke-width', '2px')
-        .attr('stroke-linecap', 'square')
         .attr('d', line)
 
     graphic.selectAll('circle')
@@ -264,7 +251,6 @@ function updateSidebar(id) {
         .transition(t)
         .attr('cx', d => x(d.date))
         .attr('cy', d => y(d.median))
-        .attr('r', 2  )
     console.log(ndvits.filter(line.defined()))
 
     // Set up data table

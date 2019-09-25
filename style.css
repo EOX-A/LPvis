@@ -1,3 +1,14 @@
+/* Variables */
+:root {
+	--background-grey: #111215;
+	--dark-grey: #22232d;
+	/* --background-grey: #111215;
+	--dark-grey: #22232d; */
+	--light-grey: #777787;
+	--text-color: white;
+	--highlight-color: blue;
+}
+
 @font-face {
   font-family: Roboto;
   src: url("media/Roboto-Regular.woff") format("woff");
@@ -5,9 +16,12 @@
   font-style: normal;
 }
 
+
+/* PAGE */
 html {
 	box-sizing: border-box;
 	font-family: 'Roboto', sans-serif;
+	color: var(--text-color);
 }
 
 *,
@@ -16,13 +30,46 @@ html {
 	box-sizing: inherit;
 }
 
+.page_wrap {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	background: var(--dark-grey);
+}
 
-body {
+header, body {
   margin: 0;
 }
 
+header {
+	padding: 1em;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+header h1 {
+	margin: 0;
+}
+
+.btn {
+	background: var(--light-grey);
+
+	color: var(--text-color);
+	font-weight: bold;
+	text-decoration: none;
+
+	border: 0;
+	border-radius: 2px;
+}
+
+.github-btn {
+	padding: 1em;
+}
+
 #wrapper {
-  display: flex;
+	flex: 1;
+	display: flex;
   flex-flow: row wrap;
 
   top: 0;
@@ -36,15 +83,18 @@ body {
 }
 
 #map {
-  height: 100vh;
+  height: 100%;
 }
 
 /* SIDEBAR */
 
 #sidebar {
-  padding: 5px;
 	display: none;
 	position: relative;
+	flex-direction: column;
+	align-items: center;
+	padding: 0;
+	background: var(--background-grey);
 }
 
 #sidebar summary {
@@ -56,9 +106,12 @@ body {
 	text-align: center;
 }
 
-#sidebar > button {
-	display: block;
-	margin: 10px auto;
+details, .download-btn {
+	margin: 1em 0 0;
+}
+
+.download-btn {
+	padding: 0.5em;
 }
 
 @media all and (min-width: 1000px) {
@@ -108,35 +161,55 @@ div.leaflet-bottom.leaflet-left {
 }
 
 /* CUSTOM CONTROLS */
+.leaflet-bar a, .leaflet-control-layers {
+	background: var(--dark-grey);
+	color: var(--text-color);
+}
+
+.leaflet-bar a:hover {
+	background: var(--background-grey);
+	color: var(--text-color);
+}
+
+.leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar {
+	border: 0;
+}
 
 .custom-control.leaflet-control {
   min-width: 24px;
   padding: 5px 10px;
 
-  background-color: #fff;
+  background-color: var(--dark-grey);
   background-clip: padding-box;
 
-  border: 2px solid rgba(0,0,0,0.2);
   border-radius: 5px;
 }
 
 
-/* TIMESTACK CONTROL */
+/* SWIPE CONTROL */
+.leaflet-control-swipe {
+	cursor: pointer;
+	top: 50%;
+	width: 2em;
+	font-size: 48px;
+	line-height: 48px;
 
+	color: var(--dark-grey);
+	text-align: center;
+	text-shadow: 0 -1px #fff, 0 1px #000;
+}
+
+
+/* TIMESTACK CONTROL */
 .leaflet-control-timestack {
 	width: 30px;
 	height: 30px;
-	background-image: url(media/analysis.svg);
-	background-size: 25px;
+	font-size: 1.5em;
 	cursor: pointer;
 }
 
 .leaflet-control-timestack.active {
-	background-color: #ffe4b3;
-}
-
-.leaflet-control-timestack.active:hover {
-	background-color: orange;
+	background-color: var(--light-grey);
 }
 
 
@@ -174,19 +247,66 @@ div.leaflet-bottom.leaflet-left {
 /* MAGNIFIYING GLASS  CONTROL */
 
 .leaflet-control-magnifying-glass {
-  background-image: url(media/cropped-eox_eye-32x32.png);
-  background-size: 20px;
+  font-size: 1.5em;
 }
 
 
-/* CHART CIRCLES */
-circle {
-	fill: #ffe4b3;
+/* MINIMAP CONTROL */
+.leaflet-control-minimap {
+	border: 0;
+}
 
+.leaflet-control-minimap a {
+	background-color: var(--dark-grey);
+}
+
+.leaflet-control-minimap a:hover {
+	background-color: var(--background-grey);
+}
+
+
+/* CHART */
+.area {
+	fill: var(--light-grey);
+	stroke: var(--light-grey);
+	stroke-width: 2;
+	stroke-linecap: square;
+}
+
+.line-segments {
+	fill: none;
+	stroke: var(--text-color);
+	stroke-width: 2px;
+	stroke-linecap: square;
+}
+
+.line-gaps {
+	fill: none;
+	stroke: var(--text-color);
+	stroke-width: 2px;
+	stroke-linecap: butt;
+}
+
+circle {
+	fill: var(--light-grey);
+	r: 2px;
 }
 .circles-cloudfree {
-	stroke: #ffa500;
+	stroke: var(--text-color);
 	stroke-width: 1.25;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	padding: 6px;
+
+	background-color: var(--dark-grey);
+}
+
+.tooltip-line {
+	visibility: hidden;
+	stroke: var(--text-color);
 }
 
 
@@ -201,9 +321,9 @@ circle {
 }
 
 #points-table th {
-  background-color: DodgerBlue;
+  background-color: var(--dark-grey);
 }
 
 #points-table tr:nth-child(even) {
-  background-color: lightblue;
+	background-color: var(--dark-grey);
 }

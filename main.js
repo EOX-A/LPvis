@@ -49,9 +49,7 @@ const CONFIDENCE_THRESHOLD = 95
 const INITIAL_SWIPE_DISTANCE = 0.1
 
 
-const timestack_icon_attribution = '<div>Icons made by ' +
-'<a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from ' +
-'<a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>'
+const font_awesome_attribution = 'Icons { CC-BY-4.0 <a href="https://fontawesome.com/">Font Awesome</a> }'
 
 const parcel_style = {
   weight: 0.3,
@@ -124,7 +122,7 @@ L.Control.MagnifyingGlass = L.Control.extend({
   },
 
   onAdd: function (map) {
-    var className = 'leaflet-control-magnifying-glass', container;
+    var className = 'leaflet-control-magnifying-glass far fa-eye', container;
 
     if (map.zoomControl && !this.options.forceSeparateButton) {
       container = map.zoomControl._container;
@@ -173,16 +171,8 @@ INITIAL_SWIPE_DISTANCE. */
 L.Control.Swipe.include({
   onAdd: function(map) {
     var e = L.DomUtil.create('div', 'leaflet-control-swipe');
-    e.style.cursor = "pointer";
-    e.style.color = "#0078A8";
-    e.style.textAlign = "center";
-    e.style.textShadow = "0 -1px #fff, 0 1px #000";
     e.style.margin = `-24px 0px 0px calc(-${INITIAL_SWIPE_DISTANCE*100}% - 48px)`;
-    e.style.top = '50%'
     e.style.left = INITIAL_SWIPE_DISTANCE*100 + '%'
-    e.style.width = "2em";
-    e.style.fontSize = "48px";
-    e.style.lineHeight = "48px";
     e.innerHTML = "\u25C0\u25B6";
     this._container = e;
     (new L.Draggable(e)).on("drag", this._onDrag, this).enable();
@@ -246,7 +236,7 @@ L.Control.Timestack = L.Control.extend({
 
   onAdd: function (map) {
     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
-    const link = L.DomUtil.create('a', 'custom-control leaflet-control-timestack', container)
+    const link = L.DomUtil.create('a', 'custom-control leaflet-control-timestack fas fa-chart-area', container)
 
     L.DomEvent
       .addListener(link, 'click', L.DomEvent.stopPropagation)
@@ -414,6 +404,7 @@ function trafficLightStyle (properties, is_highlighted) {
 
 const map = L.map('map').setView([50.102223, 9.254419], 4)
 map.attributionControl.setPrefix('<a href="https://github.com/EOX-A/LPvis" target="_blank">LPvis 🕺</a> | <a href="https://leafletjs.com/" target="_blank">Leaflet</a>')
+map.attributionControl.addAttribution(font_awesome_attribution)
 map.createPane('administrative').style.zIndex = 250
 map.createPane('labels').style.zIndex = 450
 
@@ -712,14 +703,12 @@ map.on('zoomend', e => {
   if (map.getZoom() >= 14 && map.hasLayer(agricultural_parcels)) {
     map.addControl(legend_control)
     if(!map.timestack_control) map.addControl(timestack_control)
-    map.attributionControl.addAttribution(timestack_icon_attribution)
   }
 
   if (map.getZoom() < 14) {
     map.removeControl(legend_control)
 
     map.removeControl(timestack_control)
-    map.attributionControl.removeAttribution(timestack_icon_attribution)
     timestack_mode = false
     hideSidebar()
 
