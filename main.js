@@ -376,18 +376,18 @@ function removeTooltipsFromMap() {
   })
 }
 
-function trafficLightStyle (properties, is_highlighted) {
-  if (properties.accuracy < CONFIDENCE_THRESHOLD) return {
+function trafficLightStyle (match, accuracy, is_highlighted) {
+  if (accuracy < CONFIDENCE_THRESHOLD) return {
     fillColor: 'yellow',
     color: 'yellow',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
   }
-  else if (properties.match === 'True') return {
+  else if (match === 'True') return {
     fillColor: 'green',
     color: 'green',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style),
   }
-  else if (properties.match === 'False') return {
+  else if (match === 'False') return {
     fillColor: 'red',
     color: 'red',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
@@ -589,7 +589,7 @@ const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMP
         initTable(Object.keys(properties))
       }
 
-      return trafficLightStyle(properties,false)
+      return trafficLightStyle(properties.match, properties.accuracy, false)
     }
   },
   getFeatureId: feature => feature.properties[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER],
@@ -622,7 +622,8 @@ agricultural_parcels.on('click', e => {
     if (table) table.addLine(attributes)
     clicked_features.push(attributes)
 
-    agricultural_parcels.setFeatureStyle(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER], trafficLightStyle(attributes,true))
+    agricultural_parcels.setFeatureStyle(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER],
+                                          trafficLightStyle(attributes.match, attributes.accuracy, true))
   }
 
   if(timestack_mode) {
