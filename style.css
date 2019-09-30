@@ -327,6 +327,7 @@ circle {
 }
 
 .tooltip {
+	z-index: 1000;
 	display: none;
 	position: absolute;
 	padding: 6px;
