@@ -194,12 +194,12 @@ L.control.Table.include({
     var that = this;
 
     var control = L.DomUtil.create('div','leaflet-control leaflet-table-container');
-    var inner = L.DomUtil.create('div');
+    var topbar = L.DomUtil.create('div', 'leaflet-table-topbar');
 
     var tables = L.DomUtil.create('div','leaflet-tables-container');
     this.tables = tables;
 
-    var switcher = L.DomUtil.create('select','leaflet-table-select');
+    var switcher = L.DomUtil.create('select','leaflet-table-select btn');
     switcher.addEventListener('change',function(evt){
       var curr = evt.target[evt.target.selectedIndex].value;
       for(var rel in that.containers) {
@@ -218,9 +218,9 @@ L.control.Table.include({
     option.innerHTML='Open/Close Table';
     switcher.appendChild(option);
 
-    control.appendChild(inner);
-    inner.appendChild(switcher);
-    inner.appendChild(tables);
+    control.appendChild(topbar);
+    topbar.appendChild(switcher);
+    control.appendChild(tables);
 
     control.onmousedown = control.ondblclick = L.DomEvent.stopPropagation;
 
@@ -342,7 +342,7 @@ function initTable(attribute_labels) {
   if(L.Browser.mobile) return; // disable on mobile browsers
 
   const table_control = new L. control.Table({}).addTo(map)
-  const table_container = table_control.getContainer().children[0] // leaflet.table.js|49 creates unnecessary (?) <div>
+  const table_container = table_control.getContainer()
   const button = document.createElement('button')
 
   table = new Supagrid({
@@ -352,14 +352,14 @@ function initTable(attribute_labels) {
   })
 
   table_control.addTable(table.supagrid, 'agricultural_parcels', 'Agricultural parcels')
-  table_control.getContainer().onclick = e => e.stopPropagation() // to prevent click events on map, which clear table
+  table_container.onclick = e => e.stopPropagation() // to prevent click events on map, which clear table
 
+  button.classList.add('btn', 'download-btn')
   button.style.display = 'none'
-  button.style.float = 'right'
   button.innerHTML = 'Export (CSV)'
   button.onclick = exportTableToCSV
 
-  table_container.insertBefore(button, table_container.lastChild)
+  table_container.querySelector('.leaflet-table-topbar').appendChild(button)
   table_container.querySelector('select').addEventListener('change', e => {
     if(e.target.selectedOptions[0].value === 'none') {
       button.style.display = 'none'

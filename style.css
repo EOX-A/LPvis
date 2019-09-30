@@ -106,8 +106,8 @@ header h1 {
 	text-align: center;
 }
 
-details, .download-btn {
-	margin: 1em 0 0;
+details{
+	margin: 1em 0;
 }
 
 .download-btn {
@@ -137,6 +137,31 @@ div.leaflet-bottom.leaflet-left {
   max-width: calc(100% - 20px); /* margin + padding */
 }
 
+.leaflet-table-topbar {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.leaflet-table-topbar > select {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	padding: 0.5em;
+}
+
+.leaflet-tables-container * {
+	background-color: var(--dark-grey);
+	color: var(--text-color)
+}
+
+.x-supagrid th input {
+  border: 0.1em var(--light-grey) solid;
+}
+
+.x-supagrid .head th {
+  border: none;
+}
+
 
 /* ATTRIBUTION CONTROL */
 
@@ -161,7 +186,7 @@ div.leaflet-bottom.leaflet-left {
 }
 
 /* CUSTOM CONTROLS */
-.leaflet-bar a, .leaflet-control-layers {
+.leaflet-bar a, .leaflet-control-layers, .leaflet-table-container {
 	background: var(--dark-grey);
 	color: var(--text-color);
 }
