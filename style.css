@@ -225,6 +225,7 @@ div.leaflet-bottom.leaflet-left {
 }
 
 .leaflet-swipe-pane {
+	visibility: hidden;
 	border-right: 0.1em var(--dark-grey) solid;,
 }
 

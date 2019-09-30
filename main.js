@@ -695,10 +695,12 @@ map.on('zoomend', e => {
   if (swipe_control && map.getZoom() < 14) {
     map.removeControl(swipe_control)
     swipe_control = null
+    map.getPane('swipePane').style.visibility = 'hidden';
   }
 
   if (!swipe_control && map.getZoom() >= 14 && map.hasLayer(agricultural_parcels) && map.hasLayer(physical_blocks)) {
     initSwipeControl()
+    map.getPane('swipePane').style.visibility = 'visible';
   }
 
   if (map.getZoom() >= 14 && map.hasLayer(agricultural_parcels)) {
