@@ -38,14 +38,14 @@ const NUTS_LEVEL = 2
 const NUTS_CODE_STARTS_WITH = 'AT'
 const NUTS2_GEOJSON_URL = 'geodata/bounding_box_classification_20190723.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
 
-const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'Ori_id'
+const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
 const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = 'RFL_ID'
 const SMALL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
 const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
 
 const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
 
-const CONFIDENCE_THRESHOLD = 95
+const CONFIDENCE_THRESHOLD = 0.95
 const INITIAL_SWIPE_DISTANCE = 0.1
 
 
@@ -626,9 +626,26 @@ agricultural_parcels.on('click', e => {
                                           trafficLightStyle(attributes.match, attributes.accuracy, true))
   }
 
+
   if(timestack_mode) {
     showSidebar()
-    updateSidebar(`${attributes['Ori_hold']}_${attributes['FSNR']}_${attributes['SLNR']}`)
+
+    // Experimental MongoDB containing sample LPIS parcels
+    // Request geometry of parcel by ID and pass WKT string
+    fetch('https://lpis.dev.hub.eox.at/?cql=id="'+attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER]+'"')
+    .then(response => {
+      if (response.ok) {
+        return response.json()
+      } else {
+        throw new Error('Database request not successful')
+      }
+    })
+    .then(json => {
+      const wkt = new Wkt.Wkt();
+      wkt.read(JSON.stringify(json.features[0].geometry))
+      console.log(wkt.write())
+      updateSidebar(wkt.write())
+    })
   }
 })
 

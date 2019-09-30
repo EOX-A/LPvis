@@ -7,6 +7,22 @@ const NO_TIMESTACK_FOUND_STRING = 'No timestack available for this parcel'
 const METADATA_COLS = ["Week", "Date", "Sensor", "Cloud Cover", "Haze", "Cloud shadow"]
 const FLAG_COLS = METADATA_COLS.slice(3)
 
+// FIS API: https://creodias.eu/statistical-info-service
+const FIS_URL = 'https://services.sentinel-hub.com/ogc/fis/{INSTANCE_ID}'
+const FIS_HEADERS = new Headers({ 'Accept': 'application/json',
+                                  'Content-Type': 'application/json' })
+
+const buildRequest = function(wkt) {
+  return new Request(FIS_URL, {
+    method: 'POST',
+    headers: FIS_HEADERS,
+    body: '{"layer":"NDVI","crs":"CRS:84","time":"2017-11-01/2018-10-31","resolution":"10m",' +
+           `"geometry":"${wkt}",` +
+           '"bins":10,"type":"EQUALFREQUENCY","maxcc":10}'
+  })
+}
+
+
 // D3
 const dateFormat = d3.timeFormat('%d.%m.') // e.g. 12.3.
 const formatDecimals = d3.format('.3f') // three decimals
@@ -16,12 +32,12 @@ const area = d3.area()
   .x(d => x(d.date))
   .y0(d => y(d.min)) //baseline
   .y1(d => y(d.max)) //topline
-  .defined(d => d.cloudfree)
+  .defined(d => d.mean !== 'NaN')
 
 const line = d3.line()
   .x(d => x(d.date))
-  .y(d => y(d.median))
-  .defined(d => d.cloudfree)
+  .y(d => y(d.mean))
+  .defined(d => d.mean !== 'NaN')
 
 const t = d3.transition()
   .duration(1250)
@@ -98,15 +114,15 @@ function setUpSidebar() {
     .classed('tooltip', true)
 
 
-  // METADATA AND DATA TABLE
-  const details = d3.select('#sidebar').append('details')
-  details.append('summary').text('Metadata and digital numbers')
-  metadata_list = details.append('ul')
-
-  const table = details.append('table')
-    .attr('id', 'points-table')
-  thead_tr = table.append('thead').append('tr')
-  tbody = table.append('tbody')
+  // // METADATA AND DATA TABLE
+  // const details = d3.select('#sidebar').append('details')
+  // details.append('summary').text('Metadata and digital numbers')
+  // metadata_list = details.append('ul')
+  //
+  // const table = details.append('table')
+  //   .attr('id', 'points-table')
+  // thead_tr = table.append('thead').append('tr')
+  // tbody = table.append('tbody')
 
   // DOWNLOAD BUTTON
   d3.select('#sidebar').append('a')
@@ -115,26 +131,24 @@ function setUpSidebar() {
     .html('<i class="fas fa-download"></i> Download Timestack (CSV)')
 }
 
-function updateSidebar(id) {
+// Receive WKT string, request NDVI timestack from FIS API and print chart
+function updateSidebar(wkt) {
   // Remove tooltip and line from prior parcel selection
   // (otherwise they still show data from another parcel)
   tooltip.style('display', 'none')
   d3.select('#tooltip-line').style('visibility', 'hidden')
 
-  csvurl = `geodata/timestacks/${id}.csv`
-  d3.select('#download-button')
-    .attr('href', csvurl)
-
-  fetch(csvurl)
+  // TODO: fix download button (download json response)
+  fetch(buildRequest(wkt))
   .then(response => {
     if (response.ok) {
-      return response.text()
+      return response.json()
     } else {
       // is thrown mainly when id is not valid
       throw new Error(NO_TIMESTACK_FOUND_STRING)
     }
   })
-  .then(csv => {
+  .then(json => {
     // unblur sidebar and remove sidebar overlay, if it exists
     const children = d3.selectAll('#sidebar > :not(#sidebar-overlay)')
 
@@ -146,49 +160,15 @@ function updateSidebar(id) {
       document.querySelector('#sidebar-overlay').remove()
     }
 
-    // Parse CSV and set data types
-    const ts = d3.csvParse(csv, d => {
-      const point_keys = Object.keys(d).filter(k => k.startsWith('P'))
-
-      for(let pk of point_keys) {
-        d[pk] = +d[pk] // integer
-      }
-
-      for(let fc of FLAG_COLS) {
-        d[fc] = Boolean(+d[fc]) // true or false
-      }
-
-      d.Date = d3.timeParse('%e/%_m')(d.Date)
-
-      return d
-    })
-
-    console.log(ts)
-
-    // Calculate NDVI and cloudfree flag and transform to reduced timestack
-    for(let o of ts) { // o...observation
-      for(let i = 1; i <= 8; i++) {
-        o[`P${i}NDVI`] = (o[`P${i}NIR`] - o[`P${i}R`]) / (o[`P${i}NIR`] + o[`P${i}R`])
-      }
-
-      const ndvi_keys = Object.keys(o).filter(k => /P\dNDVI/.test(k))
-      o.ndvi_median = d3.median(ndvi_keys.map(k => o[k]))
-      o.ndvi_max = d3.max(ndvi_keys.map(k => o[k]))
-      o.ndvi_min = d3.min(ndvi_keys.map(k => o[k]))
-
-      o.cloudy = false
-      for(let fc of FLAG_COLS) {
-        o.cloudy = o.cloudy || o[fc]
-      }
-    }
-
-    const ndvits = ts.map(o => {
+    // Transform data
+    let ndvits = json.C0.reverse()
+    console.log(ndvits)
+    ndvits = ndvits.map(o => {
       return {
-        cloudfree: !o.cloudy,
-        date: o.Date,
-        median: o.ndvi_median,
-        max:  o.ndvi_max,
-        min:  o.ndvi_min
+        date: d3.timeParse('%Y-%m-%d')(o.date),
+        mean: o.basicStats.mean,
+        min : o.basicStats.min,
+        max : o.basicStats.max
       }
     })
 
@@ -199,27 +179,27 @@ function updateSidebar(id) {
     x.domain([ d3.timeDay.offset(d3.min(dates), -2), d3.max(dates) ]) // offset to make space between axis and graphic
     xAxis.call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)))
 
-    // Construct a Map which has { key: date, value: [Array of points with all bands] }
-    const datemap = new Map(ts.map(o => {
-
-      const points = []
-      for(let i = 1; i <= 8; i++) {
-        points.push({
-          point: 'P' + i,
-          ...Object.fromEntries(  //requires ES2019
-            Object.entries(o)
-              .filter(e => e[0].startsWith('P' + i))
-              .map(e => [ e[0].substring(2), e[1] ]) // strip PX
-          )
-        })
-      }
-
-      const metadata = Object.fromEntries(Object.entries(o).filter(e => METADATA_COLS.includes(e[0])))
-
-      return [dateFormat(o.Date), { points: points, metadata: metadata }]
-    }))
-
-    console.log(datemap)
+    // // Construct a Map which has { key: date, value: [Array of points with all bands] }
+    // const datemap = new Map(ts.map(o => {
+    //
+    //   const points = []
+    //   for(let i = 1; i <= 8; i++) {
+    //     points.push({
+    //       point: 'P' + i,
+    //       ...Object.fromEntries(  //requires ES2019
+    //         Object.entries(o)
+    //           .filter(e => e[0].startsWith('P' + i))
+    //           .map(e => [ e[0].substring(2), e[1] ]) // strip PX
+    //       )
+    //     })
+    //   }
+    //
+    //   const metadata = Object.fromEntries(Object.entries(o).filter(e => METADATA_COLS.includes(e[0])))
+    //
+    //   return [dateFormat(o.Date), { points: points, metadata: metadata }]
+    // }))
+    //
+    // console.log(datemap)
 
     // Set up D3 visalisation
     graphic.selectAll('.area')
@@ -246,25 +226,25 @@ function updateSidebar(id) {
     graphic.selectAll('circle')
       .data(ndvits)
       .join('circle')
-        .classed('circles-cloudfree', o => o.cloudfree)
-        .classed('circles-cloudy', o => !o.cloudfree)
+        .classed('circles-cloudfree', o => o.mean !== 'NaN')
+        .classed('circles-cloudy', o => o.mean === 'NaN')
         .transition(t)
         .attr('cx', d => x(d.date))
-        .attr('cy', d => y(d.median))
+        .attr('cy', d => y(d.mean))
     console.log(ndvits.filter(line.defined()))
 
-    // Set up data table
-    // Source: https://www.vis4.net/blog/2015/04/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
-    const datemap_cols = Object.keys( //get column heads from first point sample
-      datemap.values().next().value.points
-      .values().next().value
-    ).map(c => { return { head: c, html: r => c == 'NDVI' ? formatDecimals(r[c]) : r[c] } })
-
-    thead_tr.selectAll('th')
-      .data(datemap_cols)
-      .join('th')
-        .style('min-width', '58px')
-        .text(c => c.head);
+    // // Set up data table
+    // // Source: https://www.vis4.net/blog/2015/04/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
+    // const datemap_cols = Object.keys( //get column heads from first point sample
+    //   datemap.values().next().value.points
+    //   .values().next().value
+    // ).map(c => { return { head: c, html: r => c == 'NDVI' ? formatDecimals(r[c]) : r[c] } })
+    //
+    // thead_tr.selectAll('th')
+    //   .data(datemap_cols)
+    //   .join('th')
+    //     .style('min-width', '58px')
+    //     .text(c => c.head);
 
 
     /*********** INTERACTIVITY ************/
@@ -293,47 +273,47 @@ function updateSidebar(id) {
       chart.select('#tooltip-line')
         .attr('x1', x(o.date))
         .attr('x2', x(o.date))
-        .attr('y1', y(o.median))
+        .attr('y1', y(o.mean))
 
       // Source: https://www.d3-graph-gallery.com/graph/interactivity_tooltip.html
       tooltip
         .style('left', `${tooltip_scale(x(o.date))}px`)
-        .style('top', `${y(o.max)-90}px`)
+        .style('top', `${y(o.mean)-90}px`)
         .html(`<b>NDVI ${dateFormat(o.date)}</b><br>` +
-              `Median: ${formatDecimals(o.median)}<br>` +
+              `Mean: ${formatDecimals(o.mean)}<br>` +
               `Max: ${formatDecimals(o.max)}<br>` +
               `Min: ${formatDecimals(o.min)}`)
 
-      // Update metadata list
-      metadata_list.selectAll('li')
-        .data(Object.entries(datemap.get(dateFormat(o.date)).metadata))
-        .join('li')
-          .html(m => `${m[0]}: ${m[1] instanceof Date ? dateFormat(m[1]) : m[1]}`)
-
-      // Update table of digital numbers
-      // Source: https://www.vis4.net/blog/2015/04/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
-      tbody.selectAll('tr')
-        .data(datemap.get(dateFormat(o.date)).points)
-        .join('tr')
-          .selectAll('td')
-          .data(function(row, i) {
-            // evaluate column objects against the current row
-            return datemap_cols.map(function(c) {
-              var cell = {};
-              d3.keys(c).forEach(function(k) {
-                cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
-              });
-              return cell;
-            });
-          })
-          .join('td')
-            .html(c => c.html)
+    //   // Update metadata list
+    //   metadata_list.selectAll('li')
+    //     .data(Object.entries(datemap.get(dateFormat(o.date)).metadata))
+    //     .join('li')
+    //       .html(m => `${m[0]}: ${m[1] instanceof Date ? dateFormat(m[1]) : m[1]}`)
+    //
+    //   // Update table of digital numbers
+    //   // Source: https://www.vis4.net/blog/2015/04/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
+    //   tbody.selectAll('tr')
+    //     .data(datemap.get(dateFormat(o.date)).points)
+    //     .join('tr')
+    //       .selectAll('td')
+    //       .data(function(row, i) {
+    //         // evaluate column objects against the current row
+    //         return datemap_cols.map(function(c) {
+    //           var cell = {};
+    //           d3.keys(c).forEach(function(k) {
+    //             cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+    //           });
+    //           return cell;
+    //         });
+    //       })
+    //       .join('td')
+    //         .html(c => c.html)
     })
 
-    graphic.on('mouseleave', function() {
-      // tooltip.style('visibility', 'hidden')
-      // d3.select('#tooltip-line').style('visibility', 'hidden')
-    })
+    // graphic.on('mouseleave', function() {
+    //   // tooltip.style('visibility', 'hidden')
+    //   // d3.select('#tooltip-line').style('visibility', 'hidden')
+    // })
   })
   .catch(e => {
     // Blur sidebar
