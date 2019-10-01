@@ -139,7 +139,9 @@ function updateSidebar(wkt) {
   d3.select('#tooltip-line').style('visibility', 'hidden')
 
   // TODO: fix download button (download json response)
-  fetch(buildRequest(wkt))
+  // fetch(buildRequest(wkt))
+  const random_int = Math.floor(Math.random() * 10 + 1);
+  fetch(`geodata/fis-jsons/${random_int}.json`)
   .then(response => {
     if (response.ok) {
       return response.json()

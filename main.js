@@ -630,22 +630,23 @@ agricultural_parcels.on('click', e => {
   if(timestack_mode) {
     showSidebar()
 
-    // Experimental MongoDB containing sample LPIS parcels
-    // Request geometry of parcel by ID and pass WKT string
-    fetch('https://lpis.dev.hub.eox.at/?cql=id="'+attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER]+'"')
-    .then(response => {
-      if (response.ok) {
-        return response.json()
-      } else {
-        throw new Error('Database request not successful')
-      }
-    })
-    .then(json => {
-      const wkt = new Wkt.Wkt();
-      wkt.read(JSON.stringify(json.features[0].geometry))
-      console.log(wkt.write())
-      updateSidebar(wkt.write())
-    })
+    // // Experimental MongoDB containing sample LPIS parcels
+    // // Request geometry of parcel by ID and pass WKT string
+    // fetch('https://lpis.dev.hub.eox.at/?cql=id="'+attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER]+'"')
+    // .then(response => {
+    //   if (response.ok) {
+    //     return response.json()
+    //   } else {
+    //     throw new Error('Database request not successful')
+    //   }
+    // })
+    // .then(json => {
+    //   const wkt = new Wkt.Wkt();
+    //   wkt.read(JSON.stringify(json.features[0].geometry))
+    //   console.log(wkt.write())
+    //   updateSidebar(wkt.write())
+    // })
+    window.setTimeout(updateSidebar, 2000, '')
   }
 })
 
