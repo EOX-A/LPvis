@@ -25,6 +25,7 @@ const buildRequest = function(wkt) {
 
 // D3
 const dateFormat = d3.timeFormat('%d.%m.') // e.g. 12.3.
+const monthFormat = d3.timeFormat('%b %y')
 const formatDecimals = d3.format('.3f') // three decimals
 const bisectDate = d3.bisector(d=>d.date).left
 
@@ -73,7 +74,7 @@ function hideSidebar() {
 function setUpSidebar() {
   // SVG CHART
   console.log(sidebar.offsetWidth, sidebar.clientWidth)
-  let margin = {top: 20, right: 20, bottom: 20, left: 40},
+  let margin = {top: 20, right: 20, bottom: 50, left: 40},
       width  = sidebar.offsetWidth - margin.left - margin.right,
       height = 300 - margin.top - margin.bottom
       // scrollbar_offset = 20
@@ -95,16 +96,15 @@ function setUpSidebar() {
   chart = svg.append('g')
     .attr('transform', `translate(${margin.left},${margin.top})`)
 
+  graphic = chart.append('g')
+
   xAxis = chart.append('g')
     .attr('stroke','#ffffff')
     .attr('transform', `translate(0,${height})`)
-    .call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)))
 
   yAxis = chart.append('g')
     .attr('stroke','#ffffff')
     .call(d3.axisLeft(y))
-
-  graphic = chart.append('g')
 
   chart.append('line').classed('tooltip-line', true)
     .attr('id', 'tooltip-line')
@@ -196,7 +196,12 @@ function updateSidebar(wkt) {
     // Update axis (this might be handy in the future when we have variable date domains)
     const dates = ndvits.map(o => o.date)
     x.domain([ d3.timeDay.offset(d3.min(dates), -2), d3.max(dates) ]) // offset to make space between axis and graphic
-    xAxis.call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)))
+    xAxis.call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)).tickFormat(monthFormat))
+         .selectAll('text')
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+          .attr("transform", "rotate(-65)");
 
     // // Construct a Map which has { key: date, value: [Array of points with all bands] }
     // const datemap = new Map(ts.map(o => {
