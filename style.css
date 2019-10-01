@@ -376,6 +376,9 @@ div.leaflet-bottom.leaflet-left {
 
 
 /* CHART */
+svg {
+	margin-bottom: 1.5em;
+}
 .area {
 	fill: var(--light-grey);
 	stroke: var(--light-grey);
