@@ -628,7 +628,24 @@ agricultural_parcels.on('click', e => {
 
 
   if(timestack_mode) {
+    //Prepare UI
     showSidebar()
+    setFilterOnAllSidebarChildrenButOverlay('blur(4px)')
+    createSidebarOverlayAndReturnMessageDiv()
+      .html(`
+        <p>Querying Database...</p>
+        <div class="sk-cube-grid">
+        <div class="sk-cube sk-cube1"></div>
+        <div class="sk-cube sk-cube2"></div>
+        <div class="sk-cube sk-cube3"></div>
+        <div class="sk-cube sk-cube4"></div>
+        <div class="sk-cube sk-cube5"></div>
+        <div class="sk-cube sk-cube6"></div>
+        <div class="sk-cube sk-cube7"></div>
+        <div class="sk-cube sk-cube8"></div>
+        <div class="sk-cube sk-cube9"></div>
+        </div>
+    `)
 
     // Experimental MongoDB containing sample LPIS parcels
     // Request geometry of parcel by ID and pass WKT string

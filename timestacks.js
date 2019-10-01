@@ -131,6 +131,27 @@ function setUpSidebar() {
     .html('<i class="fas fa-download"></i> Download Timestack (CSV)')
 }
 
+function setFilterOnAllSidebarChildrenButOverlay(filter) {
+  const children = d3.selectAll('#sidebar > :not(#sidebar-overlay)')
+  for(let n of children.nodes()) {
+    n.style.filter = filter
+  }
+}
+
+function createSidebarOverlayAndReturnMessageDiv() {
+  setFilterOnAllSidebarChildrenButOverlay('blur(4px)')
+
+  const som = document.querySelector('.sidebar-overlay-message')
+  if(som) {
+    return d3.select('.sidebar-overlay-message')
+  } else {
+    return d3.select('#sidebar').append('div')
+      .attr('id', 'sidebar-overlay')
+      .append('div')
+        .classed('sidebar-overlay-message', true)
+  }
+}
+
 // Receive WKT string, request NDVI timestack from FIS API and print chart
 function updateSidebar(wkt) {
   // Remove tooltip and line from prior parcel selection
@@ -150,13 +171,9 @@ function updateSidebar(wkt) {
   })
   .then(json => {
     // unblur sidebar and remove sidebar overlay, if it exists
-    const children = d3.selectAll('#sidebar > :not(#sidebar-overlay)')
+    setFilterOnAllSidebarChildrenButOverlay('')
 
-    for(let n of children.nodes()) {
-      n.style.filter = ''
-    }
-
-    if(document.querySelector('#sidebar').contains(document.querySelector('#sidebar-overlay'))) {
+    if(document.querySelector('#sidebar-overlay')) {
       document.querySelector('#sidebar-overlay').remove()
     }
 
@@ -318,26 +335,7 @@ function updateSidebar(wkt) {
   .catch(e => {
     // Blur sidebar
     console.error(e)
-    const children = d3.selectAll('#sidebar > :not(#sidebar-overlay)')
-    for(let n of children.nodes()) {
-      n.style.filter = 'blur(4px)'
-    }
-
-    // Add overlay with "missing timestack" notice
-    if(!document.querySelector('#sidebar').contains(document.querySelector('#sidebar-overlay'))) {
-      d3.select('#sidebar').append('div')
-        .attr('id', 'sidebar-overlay')
-        .style('position', 'absolute')
-        .style('width', '100%')
-        .style('height', '100%')
-        .style('top', 0)
-        .style('left', 0)
-        .style('display', 'table')
-        .append('div')
-          .style('display', 'table-cell')
-          .style('vertical-align', 'middle')
-          .style('text-align', 'center')
-          .text(NO_TIMESTACK_FOUND_STRING)
-    }
+    createSidebarOverlayAndReturnMessageDiv()
+      .text(NO_TIMESTACK_FOUND_STRING)
   })
 }
