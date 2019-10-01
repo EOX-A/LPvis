@@ -36,7 +36,7 @@ const MUNICIPALITIES_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.a
 // https://github.com/eurostat/Nuts2json
 const NUTS_LEVEL = 2
 const NUTS_CODE_STARTS_WITH = 'AT'
-const NUTS2_GEOJSON_URL = 'geodata/bounding_box_classification_20190723.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
+const NUTS2_GEOJSON_URL = 'geodata/nuts2_at.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
 
 const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
 const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = 'RFL_ID'
@@ -45,7 +45,7 @@ const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
 
 const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
 
-const CONFIDENCE_THRESHOLD = 0.95
+const CONFIDENCE_THRESHOLD = 95
 const INITIAL_SWIPE_DISTANCE = 0.1
 
 
