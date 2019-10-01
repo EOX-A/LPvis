@@ -603,7 +603,7 @@ agricultural_parcels.on('mouseover', e => {
   const attributes = e.propagatedFrom.properties
   agricultural_parcels.setTooltipContent(
     `ID: ${attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER]}<br>
-    Declaration: ${attributes['CT']}<br>
+    Declaration: ${attributes['SNAR_BEZEI']}<br>
     Conform: ${attributes.match === 'True' ? 'yes'
              : attributes.match === 'False' ? 'no'
              : 'not classified'}<br>
