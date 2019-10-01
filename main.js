@@ -529,51 +529,51 @@ const physical_blocks = L.vectorGrid.protobuf(PHYSICAL_BLOCKS_URL_TEMPLATE, {
   attribution: 'INVEKOS Referenzflächen Österreich { CC-BY-3.0-AT Agrarmarkt Austria }'
 }).bindTooltip('', { sticky: true }).addTo(map)
 
-const small_parcels = L.vectorGrid.protobuf(SMALL_PARCELS_URL_TEMPLATE, {
-  rendererFactory: L.svg.tile,
-  pane: 'swipePane',
-  interactive: true,
-  maxNativeZoom: 16,
-  minZoom: 14,
-  vectorTileLayerStyles: {
-    small_parcels: properties => {
-      return {
-        fill: true,
-        fillColor: 'orange',
-        fillOpacity: 1,
-        color: '#000000',
-        weight: 0.2
-      }
-    }
-  },
-  getFeatureId: feature => feature.properties[SMALL_PARCELS_UNIQUE_IDENTIFIER],
-  attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
-}).bindTooltip('', { sticky: true }).addTo(map)
+// const small_parcels = L.vectorGrid.protobuf(SMALL_PARCELS_URL_TEMPLATE, {
+//   rendererFactory: L.svg.tile,
+//   pane: 'swipePane',
+//   interactive: true,
+//   maxNativeZoom: 16,
+//   minZoom: 14,
+//   vectorTileLayerStyles: {
+//     small_parcels: properties => {
+//       return {
+//         fill: true,
+//         fillColor: 'orange',
+//         fillOpacity: 1,
+//         color: '#000000',
+//         weight: 0.2
+//       }
+//     }
+//   },
+//   getFeatureId: feature => feature.properties[SMALL_PARCELS_UNIQUE_IDENTIFIER],
+//   attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
+// }).bindTooltip('', { sticky: true }).addTo(map)
 
-const small_parcels_points = L.vectorGrid.protobuf(SMALL_PARCELS_POINTS_URL_TEMPLATE, {
-  rendererFactory: L.svg.tile,
-  pane: 'swipePane',
-  interactive: true,
-  maxNativeZoom: 18,
-  minZoom: 18,
-  vectorTileLayerStyles: {
-    small_parcels_points:
-    properties => {
-      return {
-        fill: true,
-        fillColor: 'black',
-        fillOpacity: 1,
-        stroke: true,
-        weight: 0.8,
-        color: 'white',
-        radius: 4,
-        className: 'points'
-      }
-    }
-  },
-  getFeatureId: feature => feature.properties[SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER],
-  attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
-}).bindTooltip('', { sticky: true }).addTo(map)
+// const small_parcels_points = L.vectorGrid.protobuf(SMALL_PARCELS_POINTS_URL_TEMPLATE, {
+//   rendererFactory: L.svg.tile,
+//   pane: 'swipePane',
+//   interactive: true,
+//   maxNativeZoom: 18,
+//   minZoom: 18,
+//   vectorTileLayerStyles: {
+//     small_parcels_points:
+//     properties => {
+//       return {
+//         fill: true,
+//         fillColor: 'black',
+//         fillOpacity: 1,
+//         stroke: true,
+//         weight: 0.8,
+//         color: 'white',
+//         radius: 4,
+//         className: 'points'
+//       }
+//     }
+//   },
+//   getFeatureId: feature => feature.properties[SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER],
+//   attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
+// }).bindTooltip('', { sticky: true }).addTo(map)
 
 const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMPLATE, {
   rendererFactory: L.svg.tile,
@@ -674,20 +674,20 @@ physical_blocks.on('mouseover', e => {
   )
 })
 
-small_parcels.on('mouseover', e => {
-  const attributes = e.propagatedFrom.properties
-  small_parcels.setTooltipContent(
-    `ID: ${attributes[SMALL_PARCELS_UNIQUE_IDENTIFIER]}<br>
-    Type: ${attributes['SNAR_BEZEI']}`
-  )
-})
+// small_parcels.on('mouseover', e => {
+//   const attributes = e.propagatedFrom.properties
+//   small_parcels.setTooltipContent(
+//     `ID: ${attributes[SMALL_PARCELS_UNIQUE_IDENTIFIER]}<br>
+//     Type: ${attributes['SNAR_BEZEI']}`
+//   )
+// })
 
-small_parcels_points.on('mouseover', e => {
-  const attributes = e.propagatedFrom.properties
-  small_parcels_points.setTooltipContent(
-    `P${attributes['pointnr']}`
-  )
-})
+// small_parcels_points.on('mouseover', e => {
+//   const attributes = e.propagatedFrom.properties
+//   small_parcels_points.setTooltipContent(
+//     `P${attributes['pointnr']}`
+//   )
+// })
 
 map.on('click', e => {
   if(clicked_features.length > 0 && !timestack_mode) {
@@ -785,8 +785,8 @@ var baselayers = {
 
 var overlays = {
   "Physical blocks": physical_blocks,
-  "Small parcels": small_parcels,
-  "Small parcels points": small_parcels_points,
+  // "Small parcels": small_parcels,
+  // "Small parcels points": small_parcels_points,
   "Agricultural parcels": agricultural_parcels,
   "Overlay": overlay
 }
