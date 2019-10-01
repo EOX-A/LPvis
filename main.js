@@ -26,11 +26,11 @@ Visualize land parcels together with classification results
 
 /****** PARAMETERS ******/
 
-const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
-const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
-const SMALL_PARCELS_URL_TEMPLATE = 'http://localhost:9003/{z}/{x}/{y}.pbf'
-const SMALL_PARCELS_POINTS_URL_TEMPLATE = 'http://localhost:9004/{z}/{x}/{y}.pbf'
-const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
+const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/agricultural_parcels/{z}/{x}/{y}.pbf'
+const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/physical_blocks/{z}/{x}/{y}.pbf'
+// const SMALL_PARCELS_URL_TEMPLATE = 'http://localhost:9003/{z}/{x}/{y}.pbf'
+// const SMALL_PARCELS_POINTS_URL_TEMPLATE = 'http://localhost:9004/{z}/{x}/{y}.pbf'
+const MUNICIPALITIES_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/municipalities/{z}/{x}/{y}.pbf'
 
 // NUTS_LEVEL and NUTS_CODE_STARTS_WITH only apply to GeoJSONs from Eurostat's Nuts2json
 // https://github.com/eurostat/Nuts2json
@@ -584,7 +584,7 @@ const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMP
   maxNativeZoom: 16,
   minZoom: 14,
   vectorTileLayerStyles: {
-    agricultural_parcels: properties => {
+    invekos_schlaege_vector_tiles: properties => {
       if(!table) {
         initTable(Object.keys(properties))
       }
