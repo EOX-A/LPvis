@@ -28,24 +28,28 @@ Visualize land parcels together with classification results
 
 const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
 const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
+const SMALL_PARCELS_URL_TEMPLATE = 'http://localhost:9003/{z}/{x}/{y}.pbf'
+const SMALL_PARCELS_POINTS_URL_TEMPLATE = 'http://localhost:9004/{z}/{x}/{y}.pbf'
 const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
 
 // NUTS_LEVEL and NUTS_CODE_STARTS_WITH only apply to GeoJSONs from Eurostat's Nuts2json
 // https://github.com/eurostat/Nuts2json
 const NUTS_LEVEL = 2
 const NUTS_CODE_STARTS_WITH = 'AT'
-const NUTS2_GEOJSON_URL = 'geodata/nuts2_at.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
+const NUTS2_GEOJSON_URL = 'geodata/bounding_box_classification_20190723.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
 
-const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'Ori_id'
+const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
 const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = 'RFL_ID'
+const SMALL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
+const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
 
 const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
 
-const CONFIDENCE_THRESHOLD = 95
-const INITIAL_SWIPE_DISTANCE = 0
+const CONFIDENCE_THRESHOLD = 0.95
+const INITIAL_SWIPE_DISTANCE = 0.1
 
-let legend_control, nuts2, swipe_control, table
-let clicked_features = []
+
+const font_awesome_attribution = 'Icons { CC-BY-4.0 <a href="https://fontawesome.com/">Font Awesome</a> }'
 
 const parcel_style = {
   weight: 0.3,
@@ -60,6 +64,9 @@ const parcel_style_highlighted = {
   fillOpacity: 1,
 }
 
+let clicked_features = []
+let timestack_mode = false
+let legend_control, nuts2, swipe_control, timestack_control, table
 
 /****** CLASS MODIFICATIONS ******/
 
@@ -115,7 +122,7 @@ L.Control.MagnifyingGlass = L.Control.extend({
   },
 
   onAdd: function (map) {
-    var className = 'leaflet-control-magnifying-glass', container;
+    var className = 'leaflet-control-magnifying-glass far fa-eye', container;
 
     if (map.zoomControl && !this.options.forceSeparateButton) {
       container = map.zoomControl._container;
@@ -164,16 +171,8 @@ INITIAL_SWIPE_DISTANCE. */
 L.Control.Swipe.include({
   onAdd: function(map) {
     var e = L.DomUtil.create('div', 'leaflet-control-swipe');
-    e.style.cursor = "pointer";
-    e.style.color = "#0078A8";
-    e.style.textAlign = "center";
-    e.style.textShadow = "0 -1px #fff, 0 1px #000";
     e.style.margin = `-24px 0px 0px calc(-${INITIAL_SWIPE_DISTANCE*100}% - 48px)`;
-    e.style.top = '50%'
     e.style.left = INITIAL_SWIPE_DISTANCE*100 + '%'
-    e.style.width = "2em";
-    e.style.fontSize = "48px";
-    e.style.lineHeight = "48px";
     e.innerHTML = "\u25C0\u25B6";
     this._container = e;
     (new L.Draggable(e)).on("drag", this._onDrag, this).enable();
@@ -195,12 +194,12 @@ L.control.Table.include({
     var that = this;
 
     var control = L.DomUtil.create('div','leaflet-control leaflet-table-container');
-    var inner = L.DomUtil.create('div');
+    var topbar = L.DomUtil.create('div', 'leaflet-table-topbar');
 
     var tables = L.DomUtil.create('div','leaflet-tables-container');
     this.tables = tables;
 
-    var switcher = L.DomUtil.create('select','leaflet-table-select');
+    var switcher = L.DomUtil.create('select','leaflet-table-select btn');
     switcher.addEventListener('change',function(evt){
       var curr = evt.target[evt.target.selectedIndex].value;
       for(var rel in that.containers) {
@@ -219,9 +218,9 @@ L.control.Table.include({
     option.innerHTML='Open/Close Table';
     switcher.appendChild(option);
 
-    control.appendChild(inner);
-    inner.appendChild(switcher);
-    inner.appendChild(tables);
+    control.appendChild(topbar);
+    topbar.appendChild(switcher);
+    control.appendChild(tables);
 
     control.onmousedown = control.ondblclick = L.DomEvent.stopPropagation;
 
@@ -229,7 +228,47 @@ L.control.Table.include({
   }
 })
 
+/* New button to toggle timestack mode / sidebar */
+L.Control.Timestack = L.Control.extend({
+  options: {
+    position: 'topleft'
+  },
 
+  onAdd: function (map) {
+    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
+    const link = L.DomUtil.create('a', 'custom-control leaflet-control-timestack fas fa-chart-area', container)
+
+    L.DomEvent
+      .addListener(link, 'click', L.DomEvent.stopPropagation)
+      .addListener(link, 'click', L.DomEvent.preventDefault)
+      .addListener(link, 'click', this._clicked);
+
+    map.timestack_control = this
+    return container
+  },
+
+  onRemove: function (map) {
+    delete map.timestack_control
+  },
+
+  _clicked: function () {
+    if(timestack_mode) {
+      timestack_mode = false
+      this.classList.remove('active')
+      hideSidebar()
+    } else {
+      timestack_mode = true
+      this.classList.add('active')
+    }
+  }
+})
+
+L.control.timestack = function () {
+  return new L.Control.Timestack();
+};
+
+/* Two new functions for L.MagnifyingGlass to aid interaction with additional
+zoom level (zoom in orthophoto beyond level 19)*/
 L.MagnifyingGlass.include({
   setFixedZoom: function(fixedZoom) {
     this._fixedZoom = (fixedZoom != -1);
@@ -258,7 +297,7 @@ function fetchJSON(url) {
 }
 
 function clearClickedFeatures() {
-  for(let id of clicked_features) agricultural_parcels.resetFeatureStyle(id)
+  for(let f of clicked_features) agricultural_parcels.resetFeatureStyle(f[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER])
   clicked_features = []
 }
 
@@ -303,7 +342,7 @@ function initTable(attribute_labels) {
   if(L.Browser.mobile) return; // disable on mobile browsers
 
   const table_control = new L. control.Table({}).addTo(map)
-  const table_container = table_control.getContainer().children[0] // leaflet.table.js|49 creates unnecessary (?) <div>
+  const table_container = table_control.getContainer()
   const button = document.createElement('button')
 
   table = new Supagrid({
@@ -313,14 +352,14 @@ function initTable(attribute_labels) {
   })
 
   table_control.addTable(table.supagrid, 'agricultural_parcels', 'Agricultural parcels')
-  table_control.getContainer().onclick = e => e.stopPropagation() // to prevent click events on map, which clear table
+  table_container.onclick = e => e.stopPropagation() // to prevent click events on map, which clear table
 
+  button.classList.add('btn', 'download-btn')
   button.style.display = 'none'
-  button.style.float = 'right'
   button.innerHTML = 'Export (CSV)'
   button.onclick = exportTableToCSV
 
-  table_container.insertBefore(button, table_container.lastChild)
+  table_container.querySelector('.leaflet-table-topbar').appendChild(button)
   table_container.querySelector('select').addEventListener('change', e => {
     if(e.target.selectedOptions[0].value === 'none') {
       button.style.display = 'none'
@@ -337,18 +376,18 @@ function removeTooltipsFromMap() {
   })
 }
 
-function trafficLightStyle (properties, is_highlighted) {
-  if (properties.accuracy < CONFIDENCE_THRESHOLD) return {
+function trafficLightStyle (match, accuracy, is_highlighted) {
+  if (accuracy < CONFIDENCE_THRESHOLD) return {
     fillColor: 'yellow',
     color: 'yellow',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
   }
-  else if (properties.match === 'True') return {
+  else if (match === 'True') return {
     fillColor: 'green',
     color: 'green',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style),
   }
-  else if (properties.match === 'False') return {
+  else if (match === 'False') return {
     fillColor: 'red',
     color: 'red',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
@@ -364,6 +403,8 @@ function trafficLightStyle (properties, is_highlighted) {
 /****** INIT MAP ******/
 
 const map = L.map('map').setView([50.102223, 9.254419], 4)
+map.attributionControl.setPrefix('<a href="https://github.com/EOX-A/LPvis" target="_blank">LPvis 🕺</a> | <a href="https://leafletjs.com/" target="_blank">Leaflet</a>')
+map.attributionControl.addAttribution(font_awesome_attribution)
 map.createPane('administrative').style.zIndex = 250
 map.createPane('labels').style.zIndex = 450
 
@@ -448,7 +489,7 @@ const municipalities = L.vectorGrid.protobuf(MUNICIPALITIES_URL_TEMPLATE, {
   minZoom: 11,
   pane: 'administrative',
   vectorTileLayerStyles: {
-    gem_at: {
+    municipalities: {
       stroke: true,
       color: '#cc6633',
       weight: 1
@@ -474,7 +515,7 @@ const physical_blocks = L.vectorGrid.protobuf(PHYSICAL_BLOCKS_URL_TEMPLATE, {
   maxNativeZoom: 15,
   minZoom: 14,
   vectorTileLayerStyles: {
-    referenz: properties => {
+    invekos_referenzen_vector_tiles: properties => {
       return {
         fill: true,
         fillColor: '#ffffff',
@@ -486,6 +527,52 @@ const physical_blocks = L.vectorGrid.protobuf(PHYSICAL_BLOCKS_URL_TEMPLATE, {
   },
   getFeatureId: feature => feature.properties[PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER],
   attribution: 'INVEKOS Referenzflächen Österreich { CC-BY-3.0-AT Agrarmarkt Austria }'
+}).bindTooltip('', { sticky: true }).addTo(map)
+
+const small_parcels = L.vectorGrid.protobuf(SMALL_PARCELS_URL_TEMPLATE, {
+  rendererFactory: L.svg.tile,
+  pane: 'swipePane',
+  interactive: true,
+  maxNativeZoom: 16,
+  minZoom: 14,
+  vectorTileLayerStyles: {
+    small_parcels: properties => {
+      return {
+        fill: true,
+        fillColor: 'orange',
+        fillOpacity: 1,
+        color: '#000000',
+        weight: 0.2
+      }
+    }
+  },
+  getFeatureId: feature => feature.properties[SMALL_PARCELS_UNIQUE_IDENTIFIER],
+  attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
+}).bindTooltip('', { sticky: true }).addTo(map)
+
+const small_parcels_points = L.vectorGrid.protobuf(SMALL_PARCELS_POINTS_URL_TEMPLATE, {
+  rendererFactory: L.svg.tile,
+  pane: 'swipePane',
+  interactive: true,
+  maxNativeZoom: 18,
+  minZoom: 18,
+  vectorTileLayerStyles: {
+    small_parcels_points:
+    properties => {
+      return {
+        fill: true,
+        fillColor: 'black',
+        fillOpacity: 1,
+        stroke: true,
+        weight: 0.8,
+        color: 'white',
+        radius: 4,
+        className: 'points'
+      }
+    }
+  },
+  getFeatureId: feature => feature.properties[SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER],
+  attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
 }).bindTooltip('', { sticky: true }).addTo(map)
 
 const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMPLATE, {
@@ -502,7 +589,7 @@ const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMP
         initTable(Object.keys(properties))
       }
 
-      return trafficLightStyle(properties,false)
+      return trafficLightStyle(properties.match, properties.accuracy, false)
     }
   },
   getFeatureId: feature => feature.properties[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER],
@@ -526,15 +613,56 @@ agricultural_parcels.on('mouseover', e => {
 
 agricultural_parcels.on('click', e => {
   L.DomEvent.stopPropagation(e)
+  if (timestack_mode || L.Browser.mobile) clearClickedFeatures() // so that only one parcel is highlighted at a time
+
   const attributes = e.propagatedFrom.properties
   console.log(attributes)
 
-  if(!clicked_features.includes(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER])) {
-    if (L.Browser.mobile) clearClickedFeatures() // so that only one parcel is highlighted at a time
+  if(!clicked_features.includes(attributes)) {
     if (table) table.addLine(attributes)
-    clicked_features.push(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER])
+    clicked_features.push(attributes)
 
-    agricultural_parcels.setFeatureStyle(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER], trafficLightStyle(attributes,true))
+    agricultural_parcels.setFeatureStyle(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER],
+                                          trafficLightStyle(attributes.match, attributes.accuracy, true))
+  }
+
+
+  if(timestack_mode) {
+    //Prepare UI
+    showSidebar()
+    setFilterOnAllSidebarChildrenButOverlay('blur(4px)')
+    createSidebarOverlayAndReturnMessageDiv()
+      .html(`
+        <p>Querying Database...</p>
+        <div class="sk-cube-grid">
+        <div class="sk-cube sk-cube1"></div>
+        <div class="sk-cube sk-cube2"></div>
+        <div class="sk-cube sk-cube3"></div>
+        <div class="sk-cube sk-cube4"></div>
+        <div class="sk-cube sk-cube5"></div>
+        <div class="sk-cube sk-cube6"></div>
+        <div class="sk-cube sk-cube7"></div>
+        <div class="sk-cube sk-cube8"></div>
+        <div class="sk-cube sk-cube9"></div>
+        </div>
+    `)
+
+    // Experimental MongoDB containing sample LPIS parcels
+    // Request geometry of parcel by ID and pass WKT string
+    fetch('https://lpis.dev.hub.eox.at/?cql=id="'+attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER]+'"')
+    .then(response => {
+      if (response.ok) {
+        return response.json()
+      } else {
+        throw new Error('Database request not successful')
+      }
+    })
+    .then(json => {
+      const wkt = new Wkt.Wkt();
+      wkt.read(JSON.stringify(json.features[0].geometry))
+      console.log(wkt.write())
+      updateSidebar(wkt.write())
+    })
   }
 })
 
@@ -546,15 +674,29 @@ physical_blocks.on('mouseover', e => {
   )
 })
 
+small_parcels.on('mouseover', e => {
+  const attributes = e.propagatedFrom.properties
+  small_parcels.setTooltipContent(
+    `ID: ${attributes[SMALL_PARCELS_UNIQUE_IDENTIFIER]}<br>
+    Type: ${attributes['SNAR_BEZEI']}`
+  )
+})
+
+small_parcels_points.on('mouseover', e => {
+  const attributes = e.propagatedFrom.properties
+  small_parcels_points.setTooltipContent(
+    `P${attributes['pointnr']}`
+  )
+})
+
 map.on('click', e => {
-  if(clicked_features.length > 0) {
+  if(clicked_features.length > 0 && !timestack_mode) {
     clearClickedFeatures()
 
     const tbody = document.querySelector('div.body > table > tbody')
     while(tbody && tbody.lastChild) {
       tbody.removeChild(tbody.lastChild)
     }
-
   }
 })
 
@@ -587,18 +729,26 @@ map.on('zoomend', e => {
   if (swipe_control && map.getZoom() < 14) {
     map.removeControl(swipe_control)
     swipe_control = null
+    map.getPane('swipePane').style.visibility = 'hidden';
   }
 
   if (!swipe_control && map.getZoom() >= 14 && map.hasLayer(agricultural_parcels) && map.hasLayer(physical_blocks)) {
     initSwipeControl()
+    map.getPane('swipePane').style.visibility = 'visible';
   }
 
   if (map.getZoom() >= 14 && map.hasLayer(agricultural_parcels)) {
     map.addControl(legend_control)
+    if(!map.timestack_control) map.addControl(timestack_control)
   }
 
   if (map.getZoom() < 14) {
     map.removeControl(legend_control)
+
+    map.removeControl(timestack_control)
+    timestack_mode = false
+    hideSidebar()
+
     removeTooltipsFromMap()
   }
 })
@@ -635,16 +785,17 @@ var baselayers = {
 
 var overlays = {
   "Physical blocks": physical_blocks,
+  "Small parcels": small_parcels,
+  "Small parcels points": small_parcels_points,
   "Agricultural parcels": agricultural_parcels,
   "Overlay": overlay
 }
 
 L.control.layers(baselayers, overlays).addTo(map)
 
-
 legend_control = L.control.custom({
   position: 'topright',
-  classes: 'legend',
+  classes: 'legend custom-control',
   content: (function() {
     let legend_content = ''
     const high_confidence_string = `High Confidence (≥${CONFIDENCE_THRESHOLD}%)`
@@ -664,14 +815,6 @@ legend_control = L.control.custom({
     return legend_content
   })()
 })
-
-
-const minimap = L.control.minimap(osm, { //layer must be one that is not present on map yet
-  toggleDisplay: true,
-  minimized: L.Browser.mobile // true if mobile browser
-}).addTo(map)
-minimap._miniMap.invalidateSize() // otherwise minimap is going crazy
-map.attributionControl.addAttribution(osm.getAttribution())
 
 const magnifying_glass = L.magnifyingGlass({
     layers: [orthophoto],
@@ -698,7 +841,16 @@ L.control.magnifyingglass(magnifying_glass, {
     forceSeparateButton: true
 }).addTo(map)
 
+const minimap = L.control.minimap(osm, { //layer must be one that is not present on map yet
+  toggleDisplay: true,
+  minimized: L.Browser.mobile // true if mobile browser
+}).addTo(map)
+minimap._miniMap.invalidateSize() // otherwise minimap is going crazy
+map.attributionControl.addAttribution(osm.getAttribution())
+
 L.control.scale( {
   imperial: false,
   maxWidth: 200
 } ).addTo(map)
+
+timestack_control = L.control.timestack()

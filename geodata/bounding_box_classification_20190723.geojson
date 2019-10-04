@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "bounding_box_classification_20190723",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 0, "width": 0.18796548536863078, "height": 0.18424157820057019, "area": 0.034631057671552716, "perimeter": 0.74441412713840194 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 14.318395625014208, 48.359153946428485 ], [ 14.506361110382839, 48.359153946428485 ], [ 14.506361110382839, 48.543395524629055 ], [ 14.318395625014208, 48.543395524629055 ], [ 14.318395625014208, 48.359153946428485 ] ] ] } }
+]
+}

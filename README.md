@@ -1,15 +1,17 @@
 # LPvis 🕺
-> Pronounce: "Elpvis" | A land parcel visualizer powered by a lightweight Leaflet map
+> Pronounce: "Elpvis" | FOSS Webapp for LPIS declaration conformity assessment and validation of ML classification results
 
-Use LPvis to visualize the results of crop type classifications in comparison to IACS/CAP (Common Agricultural Policy) declarations. Simple traffic light symbology shows computed conformity and tooltips and a data table let you dig deeper into the data.
+Use LPvis to visualize the results of crop type classifications in comparison to IACS/CAP (Common Agricultural Policy) declarations and 🆕 verify them by comparing with vegetation index timestacks. Simple traffic light symbology shows computed conformity and a sidebar with a timestack chart lets you dig deeper into the data.
 
-## [Demo (using randomly generated classification results)](http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/)
+## [Demo (using randomly generated classification results and a sample of NDVI timestacks)](http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/)
 
 ![LPvis 🕺 Screenshot](media/Screenshot_LPvis_🕺.png)
 
 ## Prerequisites
 
-LPvis expects LPIS (Land-Parcel Identification System) data and administrative boundaries as vector tiles in `.pbf` (Protobuf) format. They must be served as tile directories using a `ZXY`-scheme.
+LPvis expects LPIS (Land-Parcel Identification System) data and administrative boundaries as vector tiles in `.pbf` (Protobuf) format. They must be served as tile directories using a `ZXY`-scheme.  
+
+For the timestack mode to work, you need a geospatial database that you can query by feature ID and that returns an NDVI timestack. (Currently we have implemented a MongoDB instance and are querying timestacks from the Sentinel Hub [Feature Info Service](https://www.sentinel-hub.com/develop/documentation/api/fis-request) (FIS).)
 
 ### Example using Austrian LPIS/IACS data
 
@@ -73,6 +75,7 @@ const CONFIDENCE_THRESHOLD = 95
 ## Features
 
 * Visualize crop type classification vs. declaration using traffic light symbology
+* 🆕 Verify classification results with a vegetation index timestack chart
 * Tooltips show detailed information on parcels when you mouseover them
 * Populate data table by clicking on parcels and export attributes as CSV
 * Overlay parcels with reference areas by swiping
@@ -91,6 +94,8 @@ We are interested in your contributions. For questions, feedback and feature pro
 ## Links and References
 
 ### Dependencies
+
+#### Traffic Light Map
 - [Leaflet.js](https://leafletjs.com/) / [License information](https://github.com/Leaflet/Leaflet/blob/master/LICENSE)
 - [Leaflet.VectorGrid](https://github.com/Leaflet/Leaflet.VectorGrid) / [License information](https://github.com/Leaflet/Leaflet.VectorGrid#legalese)
 - [Leaflet table](https://github.com/diogok/leaflet.table) / MIT License
@@ -99,11 +104,16 @@ We are interested in your contributions. For questions, feedback and feature pro
 - [Leaflet.Control.Custom](https://github.com/yigityuce/Leaflet.Control.Custom) / MIT License
 - [Leaflet.MiniMap](https://github.com/Norkart/Leaflet-MiniMap) / BSD 2-Clause "Simplified" License
 
+#### Timestack Mode (Sidebar)
+- [D3.js](https://d3js.org/) / 3-Clause BSD License
+- [Wicket](http://arthur-e.github.io/Wicket/) / GPLv3
+
 ### Data
 - [INSPIRE Geoportal (European Commission)](https://inspire-geoportal.ec.europa.eu/)
 - [INVEKOS Schläge Österreich (Statistik Austria)](https://www.data.gv.at/katalog/dataset/e21a731f-9e08-4dd3-b9e5-cd460438a5d9)
 - [INVEKOS Referenzen Österreich (Statistik Austria)](https://www.data.gv.at/katalog/dataset/b9cab416-896b-408a-8665-9f4ac30f79db)
 - [Nuts2json (Eurostat)](https://github.com/eurostat/Nuts2json)
+- [Sentinel Hub](https://www.sentinel-hub.com/develop/documentation/api/fis-request)
 
 ### Background
 - [2019 JRC workshop on checks and management of agricultural land in IACS](https://ec.europa.eu/jrc/en/event/workshop/iacs-workshop-2019), especially the ["SEN4CAP output for monitoring" presentation](https://ec.europa.eu/jrc/sites/jrcsh/files/14-sen4cap.pdf) by Benjamin Koetz (ESA) and Pierre Defourny (BE)
