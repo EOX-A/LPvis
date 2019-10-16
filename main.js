@@ -24,29 +24,27 @@ Visualize land parcels together with classification results
 ### CONTROLS
 *****************************/
 
-/****** PARAMETERS ******/
+/****** LOAD PARAMETERS FROM ENV FILE ******/
 
-const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
-const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
-const SMALL_PARCELS_URL_TEMPLATE = 'http://localhost:9003/{z}/{x}/{y}.pbf'
-const SMALL_PARCELS_POINTS_URL_TEMPLATE = 'http://localhost:9004/{z}/{x}/{y}.pbf'
-const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
+const AGRICULTURAL_PARCELS_URL_TEMPLATE = window._env_.AGRICULTURAL_PARCELS_URL_TEMPLATE
+const PHYSICAL_BLOCKS_URL_TEMPLATE = window._env_.PHYSICAL_BLOCKS_URL_TEMPLATE
+const SMALL_PARCELS_URL_TEMPLATE = window._env_.SMALL_PARCELS_URL_TEMPLATE
+const SMALL_PARCELS_POINTS_URL_TEMPLATE = window._env_.SMALL_PARCELS_POINTS_URL_TEMPLATE
+const MUNICIPALITIES_URL_TEMPLATE = window._env_.MUNICIPALITIES_URL_TEMPLATE
 
-// NUTS_LEVEL and NUTS_CODE_STARTS_WITH only apply to GeoJSONs from Eurostat's Nuts2json
-// https://github.com/eurostat/Nuts2json
-const NUTS_LEVEL = 2
-const NUTS_CODE_STARTS_WITH = 'AT'
-const NUTS2_GEOJSON_URL = 'geodata/bounding_box_classification_20190723.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
+const NUTS_LEVEL = window._env_.NUTS_LEVEL
+const NUTS_CODE_STARTS_WITH = window._env_.NUTS_CODE_STARTS_WITH
+const NUTS2_GEOJSON_URL = window._env_.NUTS2_GEOJSON_URL
 
-const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
-const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = 'RFL_ID'
-const SMALL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
-const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
+const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = window._env_.AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER
+const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = window._env_.PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER
+const SMALL_PARCELS_UNIQUE_IDENTIFIER = window._env_.SMALL_PARCELS_UNIQUE_IDENTIFIER
+const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = window._env_.SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER
 
-const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
+const ORTHOPHOTO_URL_TEMPLATE = window._env_.ORTHOPHOTO_URL_TEMPLATE
 
-const CONFIDENCE_THRESHOLD = 0.95
-const INITIAL_SWIPE_DISTANCE = 0.1
+const CONFIDENCE_THRESHOLD = window._env_.CONFIDENCE_THRESHOLD
+const INITIAL_SWIPE_DISTANCE = window._env_.INITIAL_SWIPE_DISTANCE
 
 
 const font_awesome_attribution = 'Icons { CC-BY-4.0 <a href="https://fontawesome.com/">Font Awesome</a> }'
