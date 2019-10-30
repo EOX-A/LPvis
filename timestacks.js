@@ -7,20 +7,7 @@ const NO_TIMESTACK_FOUND_STRING = 'No timestack available for this parcel'
 const METADATA_COLS = ["Week", "Date", "Sensor", "Cloud Cover", "Haze", "Cloud shadow"]
 const FLAG_COLS = METADATA_COLS.slice(3)
 
-// FIS API: https://creodias.eu/statistical-info-service
-const FIS_URL = 'https://services.sentinel-hub.com/ogc/fis/{INSTANCE_ID}'
-const FIS_HEADERS = new Headers({ 'Accept': 'application/json',
-                                  'Content-Type': 'application/json' })
-
-const buildRequest = function(wkt) {
-  return new Request(FIS_URL, {
-    method: 'POST',
-    headers: FIS_HEADERS,
-    body: '{"layer":"NDVI","crs":"CRS:84","time":"2017-11-01/2018-10-31","resolution":"10m",' +
-           `"geometry":"${wkt}",` +
-           '"bins":10,"type":"EQUALFREQUENCY","maxcc":10}'
-  })
-}
+function edcApi(strings, parcel_id) { return `https://lpis.dev.hub.eox.at/?parcel_id=${parcel_id}` }
 
 
 // D3
@@ -152,15 +139,15 @@ function createSidebarOverlayAndReturnMessageDiv() {
   }
 }
 
-// Receive WKT string, request NDVI timestack from FIS API and print chart
-function updateSidebar(wkt) {
+// Receive parcel id, request NDVI timestack and print chart
+function updateSidebar(parcel_id) {
   // Remove tooltip and line from prior parcel selection
   // (otherwise they still show data from another parcel)
   tooltip.style('display', 'none')
   d3.select('#tooltip-line').style('visibility', 'hidden')
 
   // TODO: fix download button (download json response)
-  fetch(buildRequest(wkt))
+  fetch(edcApi`${parcel_id}`)
   .then(response => {
     if (response.ok) {
       return response.json()
