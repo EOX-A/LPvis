@@ -26,19 +26,20 @@ Visualize land parcels together with classification results
 
 /****** PARAMETERS ******/
 
-const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/agricultural_parcels/{z}/{x}/{y}.pbf'
-const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/physical_blocks/{z}/{x}/{y}.pbf'
-const MUNICIPALITIES_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/municipalities/{z}/{x}/{y}.pbf'
+const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
+const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
+const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
 
 // NUTS_LEVEL and NUTS_CODE_STARTS_WITH only apply to GeoJSONs from Eurostat's Nuts2json
 // https://github.com/eurostat/Nuts2json
 const NUTS_LEVEL = 2
 const NUTS_CODE_STARTS_WITH = 'AT'
-const NUTS2_GEOJSON_URL = 'geodata/nuts2_at.geojson'
-      // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
+const NUTS2_GEOJSON_URL = 'geodata/bounding_box_classification_20190723.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
 
 const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
 const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = 'RFL_ID'
+const SMALL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
+const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
 
 const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
 
