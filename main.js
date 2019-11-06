@@ -26,22 +26,19 @@ Visualize land parcels together with classification results
 
 /****** PARAMETERS ******/
 
-const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://localhost:9000/{z}/{x}/{y}.pbf'
-const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://localhost:9001/{z}/{x}/{y}.pbf'
-const SMALL_PARCELS_URL_TEMPLATE = 'http://localhost:9003/{z}/{x}/{y}.pbf'
-const SMALL_PARCELS_POINTS_URL_TEMPLATE = 'http://localhost:9004/{z}/{x}/{y}.pbf'
-const MUNICIPALITIES_URL_TEMPLATE = 'http://localhost:9002/{z}/{x}/{y}.pbf'
+const AGRICULTURAL_PARCELS_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/agricultural_parcels/{z}/{x}/{y}.pbf'
+const PHYSICAL_BLOCKS_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/physical_blocks/{z}/{x}/{y}.pbf'
+const MUNICIPALITIES_URL_TEMPLATE = 'http://lpvis-demo.s3-website.eu-central-1.amazonaws.com/geodata/municipalities/{z}/{x}/{y}.pbf'
 
 // NUTS_LEVEL and NUTS_CODE_STARTS_WITH only apply to GeoJSONs from Eurostat's Nuts2json
 // https://github.com/eurostat/Nuts2json
 const NUTS_LEVEL = 2
 const NUTS_CODE_STARTS_WITH = 'AT'
-const NUTS2_GEOJSON_URL = 'geodata/bounding_box_classification_20190723.geojson' // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
+const NUTS2_GEOJSON_URL = 'geodata/nuts2_at.geojson'
+      // OR: `https://raw.githubusercontent.com/eurostat/Nuts2json/gh-pages/2016/4258/10M/nutsrg_${NUTS_LEVEL}.json`
 
 const AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
 const PHYSICAL_BLOCKS_UNIQUE_IDENTIFIER = 'RFL_ID'
-const SMALL_PARCELS_UNIQUE_IDENTIFIER = 'ID'
-const SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER = 'id'
 
 const ORTHOPHOTO_URL_TEMPLATE = 'https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg'
 
@@ -529,52 +526,6 @@ const physical_blocks = L.vectorGrid.protobuf(PHYSICAL_BLOCKS_URL_TEMPLATE, {
   attribution: 'INVEKOS Referenzflächen Österreich { CC-BY-3.0-AT Agrarmarkt Austria }'
 }).bindTooltip('', { sticky: true }).addTo(map)
 
-// const small_parcels = L.vectorGrid.protobuf(SMALL_PARCELS_URL_TEMPLATE, {
-//   rendererFactory: L.svg.tile,
-//   pane: 'swipePane',
-//   interactive: true,
-//   maxNativeZoom: 16,
-//   minZoom: 14,
-//   vectorTileLayerStyles: {
-//     small_parcels: properties => {
-//       return {
-//         fill: true,
-//         fillColor: 'orange',
-//         fillOpacity: 1,
-//         color: '#000000',
-//         weight: 0.2
-//       }
-//     }
-//   },
-//   getFeatureId: feature => feature.properties[SMALL_PARCELS_UNIQUE_IDENTIFIER],
-//   attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
-// }).bindTooltip('', { sticky: true }).addTo(map)
-
-// const small_parcels_points = L.vectorGrid.protobuf(SMALL_PARCELS_POINTS_URL_TEMPLATE, {
-//   rendererFactory: L.svg.tile,
-//   pane: 'swipePane',
-//   interactive: true,
-//   maxNativeZoom: 18,
-//   minZoom: 18,
-//   vectorTileLayerStyles: {
-//     small_parcels_points:
-//     properties => {
-//       return {
-//         fill: true,
-//         fillColor: 'black',
-//         fillOpacity: 1,
-//         stroke: true,
-//         weight: 0.8,
-//         color: 'white',
-//         radius: 4,
-//         className: 'points'
-//       }
-//     }
-//   },
-//   getFeatureId: feature => feature.properties[SMALL_PARCELS_POINTS_UNIQUE_IDENTIFIER],
-//   attribution: 'Small Parcels { CC-BY-3.0-AT Agrarmarkt Austria }'
-// }).bindTooltip('', { sticky: true }).addTo(map)
-
 const agricultural_parcels = L.vectorGrid.protobuf(AGRICULTURAL_PARCELS_URL_TEMPLATE, {
   rendererFactory: L.svg.tile,
   interactive: true,
@@ -631,6 +582,9 @@ agricultural_parcels.on('click', e => {
     //Prepare UI
     showSidebar()
     setFilterOnAllSidebarChildrenButOverlay('blur(4px)')
+
+    // Spinner
+    // Source: https://tobiasahlin.com/spinkit/
     createSidebarOverlayAndReturnMessageDiv()
       .html(`
         <p>Querying Database...</p>
@@ -647,8 +601,7 @@ agricultural_parcels.on('click', e => {
         </div>
     `)
 
-    // Experimental MongoDB containing sample LPIS parcels
-    // Request geometry of parcel by ID and pass WKT string
+    // parcel ID is used for timestack query
     updateSidebar(attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER])
   }
 })
@@ -660,21 +613,6 @@ physical_blocks.on('mouseover', e => {
     Type: ${attributes['REF_ART']}`
   )
 })
-
-// small_parcels.on('mouseover', e => {
-//   const attributes = e.propagatedFrom.properties
-//   small_parcels.setTooltipContent(
-//     `ID: ${attributes[SMALL_PARCELS_UNIQUE_IDENTIFIER]}<br>
-//     Type: ${attributes['SNAR_BEZEI']}`
-//   )
-// })
-
-// small_parcels_points.on('mouseover', e => {
-//   const attributes = e.propagatedFrom.properties
-//   small_parcels_points.setTooltipContent(
-//     `P${attributes['pointnr']}`
-//   )
-// })
 
 map.on('click', e => {
   if(clicked_features.length > 0 && !timestack_mode) {
@@ -772,8 +710,6 @@ var baselayers = {
 
 var overlays = {
   "Physical blocks": physical_blocks,
-  // "Small parcels": small_parcels,
-  // "Small parcels points": small_parcels_points,
   "Agricultural parcels": agricultural_parcels,
   "Overlay": overlay
 }

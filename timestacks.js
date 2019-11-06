@@ -4,9 +4,6 @@
 
 const NO_TIMESTACK_FOUND_STRING = 'No timestack available for this parcel'
 
-const METADATA_COLS = ["Week", "Date", "Sensor", "Cloud Cover", "Haze", "Cloud shadow"]
-const FLAG_COLS = METADATA_COLS.slice(3)
-
 function edcApi(strings, parcel_id) { return `https://lpis.dev.hub.eox.at/?parcel_id=${parcel_id}` }
 
 
@@ -36,8 +33,7 @@ let sidebar, // DOM
     csvurl, // file
     chart, graphic, // SVG
     x, y, xAxis, yAxis, // D3
-    tooltip, tooltip_scale,
-    thead_tr, tbody, metadata_list // metadata
+    tooltip, tooltip_scale
 
 // Don't fill sidebar before DOMContentLoaded
 window.addEventListener('DOMContentLoaded', e => {
@@ -100,16 +96,6 @@ function setUpSidebar() {
   tooltip = d3.select("#sidebar").append('div')
     .classed('tooltip', true)
 
-
-  // // METADATA AND DATA TABLE
-  // const details = d3.select('#sidebar').append('details')
-  // details.append('summary').text('Metadata and digital numbers')
-  // metadata_list = details.append('ul')
-  //
-  // const table = details.append('table')
-  //   .attr('id', 'points-table')
-  // thead_tr = table.append('thead').append('tr')
-  // tbody = table.append('tbody')
 
   // DOWNLOAD BUTTON
   d3.select('#sidebar').append('a')
@@ -188,28 +174,6 @@ function updateSidebar(parcel_id) {
           .attr("dy", ".15em")
           .attr("transform", "rotate(-65)");
 
-    // // Construct a Map which has { key: date, value: [Array of points with all bands] }
-    // const datemap = new Map(ts.map(o => {
-    //
-    //   const points = []
-    //   for(let i = 1; i <= 8; i++) {
-    //     points.push({
-    //       point: 'P' + i,
-    //       ...Object.fromEntries(  //requires ES2019
-    //         Object.entries(o)
-    //           .filter(e => e[0].startsWith('P' + i))
-    //           .map(e => [ e[0].substring(2), e[1] ]) // strip PX
-    //       )
-    //     })
-    //   }
-    //
-    //   const metadata = Object.fromEntries(Object.entries(o).filter(e => METADATA_COLS.includes(e[0])))
-    //
-    //   return [dateFormat(o.Date), { points: points, metadata: metadata }]
-    // }))
-    //
-    // console.log(datemap)
-
     // Set up D3 visalisation
     graphic.selectAll('.area')
       .data([ndvits])
@@ -241,19 +205,6 @@ function updateSidebar(parcel_id) {
         .attr('cx', d => x(d.date))
         .attr('cy', d => y(d.mean))
     console.log(ndvits.filter(line.defined()))
-
-    // // Set up data table
-    // // Source: https://www.vis4.net/blog/2015/04/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
-    // const datemap_cols = Object.keys( //get column heads from first point sample
-    //   datemap.values().next().value.points
-    //   .values().next().value
-    // ).map(c => { return { head: c, html: r => c == 'NDVI' ? formatDecimals(r[c]) : r[c] } })
-    //
-    // thead_tr.selectAll('th')
-    //   .data(datemap_cols)
-    //   .join('th')
-    //     .style('min-width', '58px')
-    //     .text(c => c.head);
 
 
     /*********** INTERACTIVITY ************/
@@ -292,37 +243,7 @@ function updateSidebar(parcel_id) {
               `Mean: ${formatDecimals(o.mean)}<br>` +
               `Max: ${formatDecimals(o.max)}<br>` +
               `Min: ${formatDecimals(o.min)}`)
-
-    //   // Update metadata list
-    //   metadata_list.selectAll('li')
-    //     .data(Object.entries(datemap.get(dateFormat(o.date)).metadata))
-    //     .join('li')
-    //       .html(m => `${m[0]}: ${m[1] instanceof Date ? dateFormat(m[1]) : m[1]}`)
-    //
-    //   // Update table of digital numbers
-    //   // Source: https://www.vis4.net/blog/2015/04/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
-    //   tbody.selectAll('tr')
-    //     .data(datemap.get(dateFormat(o.date)).points)
-    //     .join('tr')
-    //       .selectAll('td')
-    //       .data(function(row, i) {
-    //         // evaluate column objects against the current row
-    //         return datemap_cols.map(function(c) {
-    //           var cell = {};
-    //           d3.keys(c).forEach(function(k) {
-    //             cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
-    //           });
-    //           return cell;
-    //         });
-    //       })
-    //       .join('td')
-    //         .html(c => c.html)
     })
-
-    // graphic.on('mouseleave', function() {
-    //   // tooltip.style('visibility', 'hidden')
-    //   // d3.select('#tooltip-line').style('visibility', 'hidden')
-    // })
   })
   .catch(e => {
     // Blur sidebar
