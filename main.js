@@ -701,6 +701,30 @@ map.on('layerremove', e => {
   }
 })
 
+/* Dynamic Classification Results */
+let sum = 0
+let idset = new Set()
+agricultural_parcels.on('tileload', e => {
+  const key = agricultural_parcels._tileCoordsToKey(e.coords)
+  const ids = Object.keys(agricultural_parcels._vectorTiles[key]._features)
+  sum += ids.length
+  idset = new Set([...idset, ...ids])
+  console.log('Setsize: ' + idset.size)
+  console.log('Sum of features: ' + sum)
+})
+
+function colorFeatures(idset) {
+  idset.forEach(id => {
+    agricultural_parcels.setFeatureStyle(id, {
+      weight: 0.3,
+      fill: true,
+      fillOpacity: 0.6,
+      fillColor: 'black',
+      color: 'black'
+    })
+  })
+}
+
 
 /****** CONTROLS ******/
 
