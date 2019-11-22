@@ -133,7 +133,7 @@ function updateSidebar(parcel_id) {
   d3.select('#tooltip-line').style('visibility', 'hidden')
 
   // TODO: fix download button (download json response)
-  fetch(edcApi`${parcel_id}`)
+  fetch(EDC_API`${parcel_id}`)
   .then(response => {
     if (response.ok) {
       return response.json()
