@@ -555,7 +555,7 @@ agricultural_parcels.on('mouseover', e => {
   const attributes = e.propagatedFrom.properties
   agricultural_parcels.setTooltipContent(
     `ID: ${attributes[AGRICULTURAL_PARCELS_UNIQUE_IDENTIFIER]}<br>
-    Declaration: ${attributes['CT']}<br>
+    Declaration: ${attributes['SNAR_BEZEI']}<br>
     Conform: ${attributes.match === 'True' ? 'yes'
              : attributes.match === 'False' ? 'no'
              : 'not classified'}<br>
@@ -704,14 +704,7 @@ map.on('layerremove', e => {
 /* Dynamic Classification Results */
 let sum = 0
 let idset = new Set()
-agricultural_parcels.on('tileload', e => {
-  const key = agricultural_parcels._tileCoordsToKey(e.coords)
-  const ids = Object.keys(agricultural_parcels._vectorTiles[key]._features)
-  sum += ids.length
-  idset = new Set([...idset, ...ids])
-  console.log('Setsize: ' + idset.size)
-  console.log('Sum of features: ' + sum)
-})
+let new_ids = new Set()
 
 function colorFeatures(idset) {
   idset.forEach(id => {
@@ -724,6 +717,38 @@ function colorFeatures(idset) {
     })
   })
 }
+
+function setDiff(a,b) {
+  return new Set([...a].filter(x => !b.has(x)));
+}
+
+agricultural_parcels.on('loading', e => {
+  console.log('Start loading')
+  new_ids.clear()
+})
+
+agricultural_parcels.on('tileload', e => {
+  const key = agricultural_parcels._tileCoordsToKey(e.coords)
+  const tile_ids = Object.keys(agricultural_parcels._vectorTiles[key]._features)
+  new_ids = new Set([...new_ids, ...tile_ids]) // Union of new_ids and the ids of the loaded tile
+
+  sum += tile_ids.length
+  console.log('Setsize: ' + new_ids.size)
+  console.log('Sum of features: ' + sum)
+})
+
+agricultural_parcels.on('load', e => {
+  console.log('Finished loading')
+  const send_ids = setDiff(new_ids, idset) // prune new_ids (remove ids that we already have)
+  console.log(send_ids)
+  fetchJSON('classification_results.json')
+    .then(results =>
+      colorFeatures(send_ids)
+    )
+  idset = new Set([...send_ids, ...idset])
+})
+
+
 
 
 /****** CONTROLS ******/
