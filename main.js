@@ -513,7 +513,7 @@ const physical_blocks = L.vectorGrid.protobuf(PHYSICAL_BLOCKS_URL_TEMPLATE, {
   maxNativeZoom: 15,
   minZoom: 14,
   vectorTileLayerStyles: {
-    invekos_referenzen_vector_tiles: properties => {
+    physical_blocks: properties => {
       return {
         fill: true,
         fillColor: '#ffffff',
