@@ -11,7 +11,7 @@ Use LPvis to visualize the results of crop type classifications in comparison to
 
 LPvis expects LPIS (Land-Parcel Identification System) data and administrative boundaries as vector tiles in `.pbf` (Protobuf) format. They must be served as tile directories using a `ZXY`-scheme.  
 
-For the timestack mode to work, you need a geospatial database that you can query by feature ID and that returns an NDVI timestack. (Currently we have implemented a MongoDB instance and are querying timestacks from the Sentinel Hub [Feature Info Service](https://www.sentinel-hub.com/develop/documentation/api/fis-request) (FIS).)
+For the timestack mode to work, you need a geospatial database that you can query by feature ID and that returns an NDVI timestack. (Currently we have implemented a PostGIS instance and are querying timestacks from the Sentinel Hub [Feature Info Service](https://www.sentinel-hub.com/develop/documentation/api/fis-request) (FIS).)
 
 ### Example using Austrian LPIS/IACS data
 
@@ -69,6 +69,14 @@ When the confidence in the classification of a parcel lies below a certain thres
 
 ```javascript
 const CONFIDENCE_THRESHOLD = 95
+```
+
+### Configure NDVI timestack sidebar
+
+To make the NDVI timestack sidebar work, you must provide an endpoint that returns NDVI timestacks in the format of the [Sentinel Hub FIS](https://www.sentinel-hub.com/develop/documentation/api/fis-request):
+
+```javascript
+function EDC_API(strings, parcel_id) { return `/timestacks?parcel_id=${parcel_id}` }
 ```
 
 

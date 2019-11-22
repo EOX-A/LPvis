@@ -4,7 +4,7 @@
 
 const NO_TIMESTACK_FOUND_STRING = 'No timestack available for this parcel'
 
-function edcApi(strings, parcel_id) { return `https://lpis.dev.hub.eox.at/?parcel_id=${parcel_id}` }
+function EDC_API(strings, parcel_id) { return `/timestacks?parcel_id=${parcel_id}` }
 
 
 // D3
