@@ -380,12 +380,12 @@ function trafficLightStyle (match, accuracy, is_highlighted) {
     color: 'yellow',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
   }
-  else if (match === 'True') return {
+  else if (match === true) return {
     fillColor: 'green',
     color: 'green',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style),
   }
-  else if (match === 'False') return {
+  else if (match === false) return {
     fillColor: 'red',
     color: 'red',
     ...(is_highlighted ? parcel_style_highlighted : parcel_style)
@@ -703,18 +703,21 @@ map.on('layerremove', e => {
 
 /* Dynamic Classification Results */
 let sum = 0
-let idset = new Set()
-let new_ids = new Set()
+let parcel_map = new Map()
+let new_tile_keys = new Set()
+let new_parcels = new Map()
 
-function colorFeatures(idset) {
-  idset.forEach(id => {
-    agricultural_parcels.setFeatureStyle(id, {
-      weight: 0.3,
-      fill: true,
-      fillOpacity: 0.6,
-      fillColor: 'black',
-      color: 'black'
-    })
+function colorFeatures(idmap) {
+  idmap.forEach((parcel, id)  => {
+    const declared_ct_id = parcel.declared_ct_id
+    const classification_results = parcel.classification_results
+    agricultural_parcels.setFeatureStyle(id,
+      trafficLightStyle(
+        true,//declared_ct_id === classification_results[0].crop_id,
+        classification_results[0].probability,
+        false
+      )
+    )
   })
 }
 
@@ -722,30 +725,78 @@ function setDiff(a,b) {
   return new Set([...a].filter(x => !b.has(x)));
 }
 
+function mapDiff(a,b) {
+  return new Map([...a].filter(x => !b.has(x[0])))
+}
+
+// When tiles start loading
 agricultural_parcels.on('loading', e => {
   console.log('Start loading')
-  new_ids.clear()
+  new_tile_keys.clear()
+  new_parcels.clear()
 })
 
+// When a tile has loaded
 agricultural_parcels.on('tileload', e => {
   const key = agricultural_parcels._tileCoordsToKey(e.coords)
-  const tile_ids = Object.keys(agricultural_parcels._vectorTiles[key]._features)
-  new_ids = new Set([...new_ids, ...tile_ids]) // Union of new_ids and the ids of the loaded tile
-
-  sum += tile_ids.length
-  console.log('Setsize: ' + new_ids.size)
-  console.log('Sum of features: ' + sum)
+  new_tile_keys.add(key)
 })
 
+// When layer has loaded all tiles
 agricultural_parcels.on('load', e => {
   console.log('Finished loading')
-  const send_ids = setDiff(new_ids, idset) // prune new_ids (remove ids that we already have)
-  console.log(send_ids)
-  fetchJSON('classification_results.json')
-    .then(results =>
-      colorFeatures(send_ids)
-    )
-  idset = new Set([...send_ids, ...idset])
+  // Get all new parcels
+  new_tile_keys.forEach(key => {
+    const features = agricultural_parcels._vectorTiles[key]._features
+    const tile_parcels = new Map(Object.keys(features).map(id => {
+      const properties = features[id][0].feature.properties
+      properties.tilekey = key // a feature might have multiple tilekeys if split over more than one tile
+      return [Number(id), properties]
+    }))
+    new_parcels = new Map([...new_parcels, ...tile_parcels]) // later maps overwrite properties of earlier maps
+  })
+
+
+  // Prune and send ids to service
+  const pruned_parcels = mapDiff(new_parcels, parcel_map) // prune new_parcels (remove parcels that we already have)
+  // console.log(pruned_parcels)
+  const sent_ids = new Set(pruned_parcels.keys())
+  fetchJSON('geodata/classification_results.json') //mockup
+    .then(results => {
+      results = new Map(results.filter(r => {
+            return pruned_parcels.has(r.parcel_id)
+        }).map(r => {
+          const parcel_id = r.parcel_id,
+                classification_results = r.classification_results,
+                properties = pruned_parcels.get(parcel_id)
+
+          return [parcel_id, {
+            'declared_ct_id': properties.Ctnum,
+            'classification_results': r.classification_results,
+            'tilekey': properties.tilekey
+        }]
+      }))
+      // console.log(results)
+
+      colorFeatures(results)
+      parcel_map = new Map([...parcel_map, ...results])
+      console.log(parcel_map)
+  })
+})
+
+agricultural_parcels.on('tileunload', e => {
+  console.log('Tile unloaded')
+  const key = agricultural_parcels._tileCoordsToKey(e.coords)
+  const removed_ids = new Set(Array.from(parcel_map.entries()).filter(p => {
+    return p[1].tilekey === key
+  }).map(p => {
+    return p[0]
+  }))
+  // console.log(removed_ids)
+  // remove ids even if they might still be in one of the displayed tiles.
+  // We can fetch the few again.
+  parcel_map = mapDiff(parcel_map, removed_ids)
+  console.log(parcel_map)
 })
 
 
