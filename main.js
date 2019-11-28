@@ -711,13 +711,15 @@ function colorFeatures(idmap) {
   idmap.forEach((parcel, id)  => {
     const declared_ct_id = parcel.declared_ct_id
     const classification_results = parcel.classification_results
-    agricultural_parcels.setFeatureStyle(id,
-      trafficLightStyle(
-        true,//declared_ct_id === classification_results[0].crop_id,
-        classification_results[0].probability,
-        false
-      )
-    )
+    window.setTimeout(() => {
+      agricultural_parcels.setFeatureStyle(id,
+        trafficLightStyle(
+          true,//declared_ct_id === classification_results[0].crop_id,
+          classification_results[0].probability,
+          false
+        )
+      )},
+      2000)
   })
 }
 
