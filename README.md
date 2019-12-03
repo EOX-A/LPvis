@@ -17,6 +17,7 @@ For the timestack mode to work, you need a geospatial database that you can quer
 
 1. Download [agricultural parcels](https://www.data.gv.at/katalog/dataset/e21a731f-9e08-4dd3-b9e5-cd460438a5d9), [phyical blocks](https://www.data.gv.at/katalog/dataset/b9cab416-896b-408a-8665-9f4ac30f79db) and [municipalities](https://www.data.gv.at/katalog/dataset/566c99be-b436-365e-af4f-27be6c536358) as `shp`.
 - Transform them in QGIS to `EPSG:4326` (required by [`tippecanoe`](https://github.com/mapbox/tippecanoe)).
+- Beware of encoding of parcels layer, as loading the shapefile with encoding utf-8 removes the letters with german "umlaut". For example setting encoding of the layer to `ISO-8859-1` solved the problem. Then export Geopackage with encoding utf-8.
 - Join classification results to agricultural parcels.
 - Export as `gpkg`.
 - Pipe `gpkg` with `fiona` to [`tippecanoe`](https://github.com/mapbox/tippecanoe). E.g.:
