@@ -23,6 +23,7 @@ For the timestack mode to work, you need a geospatial database that you can quer
 ```shell
 fio cat agricultural_parcels.gpkg | tippecanoe --drop-densest-as-needed --read-parallel --minimum-zoom=14 --maximum-zoom=16 --output-to-directory=agricultural_parcels -l agricultural_parcels -f
 ```
+- To create uncompressed pbf tiles, add `--no-tile-compression`.
 6. Serve tile directory with `<directory to LPvis>/util/serve_with_headers.py <port>` to add the necessary headers.
 
 ## Installation / Getting started
