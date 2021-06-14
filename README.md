@@ -103,6 +103,9 @@ We are interested in your contributions. For questions, feedback and feature pro
 
 ## Links and References
 
+### Posters
+- [LPvis: FOSS Webapp for LPIS declaration conformity assessment and validation of ML classification results (Now on Github!)](https://marswiki.jrc.ec.europa.eu/wikicap/images/0/09/P3_LPvis.pdf) presented at the [25<sup>th</sup> MARS Conference](https://ec.europa.eu/jrc/en/event/conference/25th-mars-conference) of the European Commission
+
 ### Dependencies
 
 #### Traffic Light Map
